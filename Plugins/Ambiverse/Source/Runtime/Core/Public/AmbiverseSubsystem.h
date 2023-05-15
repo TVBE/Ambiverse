@@ -47,9 +47,13 @@ private:
 	/** Checks if an ambience layer*/
 	UAmbiverseLayer* FindActiveAmbienceLayer(const UAmbiverseLayer* LayerToFind) const;
 
+	static float GetSoundInterval(const UAmbiverseLayer* Layer, const FAmbiverseLayerQueueEntry& Entry);
+	static float GetSoundVolume(const UAmbiverseLayer* Layer, const FAmbiverseLayerQueueEntry& Entry);
+
 #if !UE_BUILD_SHIPPING
 	void SetSoundSourceVisualisationEnabled(bool IsEnabled);
 #endif
 };
+
 
 

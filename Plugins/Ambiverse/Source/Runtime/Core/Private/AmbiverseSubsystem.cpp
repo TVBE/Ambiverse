@@ -20,7 +20,6 @@ void UAmbiverseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	}
 
 #if !UE_BUILD_SHIPPING
-	// Define the console command.
 	SoundSourceVisualisationConsoleCommand = MakeUnique<FAutoConsoleCommand>(
 		TEXT("av.EnableSoundSourceVisualisation"),
 		TEXT("Enable or disable sound source visualisation."),
@@ -28,7 +27,6 @@ void UAmbiverseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		{
 			if (Args.Num() > 0)
 			{
-				// Parse the first argument as an integer, then convert to a bool.
 				SetSoundSourceVisualisationEnabled(FCString::Atoi(*Args[0]) != 0);
 			}
 		})
@@ -83,6 +81,7 @@ void UAmbiverseSubsystem::AddAmbienceLayer(UAmbiverseLayer* Layer)
 
 void UAmbiverseSubsystem::PopAmbienceLayer(UAmbiverseLayer* Layer)
 {
+	if (!Layer) { return; }
 }
 
 UAmbiverseLayer* UAmbiverseSubsystem::FindActiveAmbienceLayer(const UAmbiverseLayer* LayerToFind) const
@@ -138,6 +137,22 @@ void UAmbiverseSubsystem::ProcessAmbienceLayerQueue(UAmbiverseLayer* Layer, FAmb
 
 		GetWorld()->GetTimerManager().SetTimer(Layer->TimerHandle, Layer->TimerDelegate, NewTime, false);
 	}
+}
+
+float UAmbiverseSubsystem::GetSoundInterval(const UAmbiverseLayer* Layer, const FAmbiverseLayerQueueEntry& Entry)
+{
+	if (!Layer) { return -1.0f; }
+	float Interval {FMath::RandRange(Entry.SoundData.DelayMin, Entry.SoundData.DelayMax)};
+	Interval /= Layer->LayerDensity;
+	return Interval;
+}
+
+float UAmbiverseSubsystem::GetSoundVolume(const UAmbiverseLayer* Layer, const FAmbiverseLayerQueueEntry& Entry)
+{
+	if (!Layer) { return -1.0f; }
+	float Volume {Entry.SoundData.Volume};
+	Volume *= Layer->LayerVolume;
+	return Volume;
 }
 
 #if !UE_BUILD_SHIPPING

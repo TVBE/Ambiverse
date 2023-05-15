@@ -3,6 +3,8 @@
 
 #include "AmbiverseLayer.h"
 
+#include "AmbiverseParameterManager.h"
+
 DEFINE_LOG_CATEGORY_CLASS(UAmbiverseLayer, LogAmbienceLayer);
 
 bool UAmbiverseLayer::GetEntryWithLowestTime(FAmbiverseLayerQueueEntry& OutEntry)
@@ -50,3 +52,4 @@ void UAmbiverseLayer::SortQueueDataByTime()
 		});
 	}
 }
+

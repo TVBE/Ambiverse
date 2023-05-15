@@ -8,7 +8,10 @@
 #include "TimerManager.h"
 #include "AmbiverseLayer.generated.h"
 
+class UAmbiverseSubsystem;
+class UAmbiverseParameter;
 class UAmbiverseSoundSourceManager;
+
 USTRUCT()
 struct FAmbiverseLayerQueueEntry
 {
@@ -29,9 +32,39 @@ class AMBIVERSE_API UAmbiverseLayer : public UObject
 	DECLARE_LOG_CATEGORY_CLASS(LogAmbienceLayer, Log, All)
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (TitleProperty = "Name"))
+#if WITH_EDITORONLY_DATA
+	/** User friendly name for the layer. */
+	UPROPERTY(EditAnywhere, Category = "Layer", Meta = (EditCondition = "IsEnabled"))
+	FName Name;
+
+	/** A description for the layer. */
+	UPROPERTY(EditAnywhere, Category = "Layer", Meta = (EditCondition = "IsEnabled", MultiLine))
+	FName Description;
+#endif
+	
+	/** The color of the layer when visualised in the editor. */
+	UPROPERTY(EditAnywhere, Category = "Layer", Meta = (EditCondition = "IsEnabled"))
+	FColor Color {FColor::Blue};
+	
+	/** the procedural sound data of this layer. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sounds", Meta = (TitleProperty = "Name", EditCondition = "IsEnabled"))
 	TArray<FAmbiverseProceduralSoundData> ProceduralSounds;
 
+	/** Parameters that influence all procedural sounds in this layer. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Parameters", Meta = (TitleProperty = "Name", EditCondition = "IsEnabled"))
+	TArray<UAmbiverseParameter*> Parameters;
+
+	/** Volume multiplier for all sounds in this layer. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (DisplayName = "Volume", ClampMin = "0", ClampMax = "2", UIMin = "1", UIMax ="2"))
+	float LayerVolume {1.0f};
+
+	/** Rate multiplier for all sounds in this layer. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (DisplayName = "Density", ClampMin = "0", ClampMax = "2", UIMin = "1", UIMax ="2"))
+	float LayerDensity {1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (DisplayName = "Enable Layer"))
+	bool IsEnabled {true};
+	
 	UPROPERTY()
 	TArray<FAmbiverseLayerQueueEntry> SoundQueue;
 

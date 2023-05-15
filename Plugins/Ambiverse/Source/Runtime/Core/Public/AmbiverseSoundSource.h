@@ -22,6 +22,7 @@ class AMBIVERSE_API AAmbiverseSoundSource : public AActor
 public:
 #if !UE_BUILD_SHIPPING
 	bool IsDebugVisualisationEnabled {false};
+	float ActiveTime {0.0f};
 #endif
 
 private:
