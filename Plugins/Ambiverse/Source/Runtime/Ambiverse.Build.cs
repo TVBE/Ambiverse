@@ -10,14 +10,14 @@ public class Ambiverse : ModuleRules
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				// ... add public include paths required here ...
+				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/Core/Public",
+				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/Data/Public"
 			}
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-				// ... add other private include paths required here ...
 			}
 			);
 			
@@ -26,7 +26,6 @@ public class Ambiverse : ModuleRules
 			new string[]
 			{
 				"Core",
-				// ... add other public dependencies that you statically link with here ...
 			}
 			);
 			
@@ -38,7 +37,8 @@ public class Ambiverse : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
+				"MetasoundEngine",
+				"AmbiverseEditor"
 			}
 			);
 		
@@ -46,7 +46,6 @@ public class Ambiverse : ModuleRules
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[]
 			{
-				// ... add any modules that your module loads dynamically here ...
 			}
 			);
 	}
