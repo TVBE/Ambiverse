@@ -48,4 +48,8 @@ struct FAmbiverseProceduralSoundData
 	bool IsValid {true};
 
 	static bool Validate(FAmbiverseProceduralSoundData& SoundData);
+
+	static UMetaSoundSource* GetSoundFromMap(const TMap<UMetaSoundSource*, int>& SoundMap);
 };
+
+

@@ -23,19 +23,5 @@ struct FAmbiverseSoundDistributionData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Play Range")
 	float VerticalRange {100.0f};
 	
-	static FTransform GetSoundTransform(const FAmbiverseSoundDistributionData& DistributionData);
+	static FTransform GetSoundTransform(const FAmbiverseSoundDistributionData& DistributionData, const FVector& ListenerLocation);
 };
-
-inline FTransform FAmbiverseSoundDistributionData::GetSoundTransform(const FAmbiverseSoundDistributionData& DistributionData)
-{
-	FTransform Transform;
-
-	const double X {FMath::RandRange(DistributionData.HorizontalRange.X, DistributionData.HorizontalRange.Y)};
-	const double Y {FMath::RandRange(DistributionData.HorizontalRange.X, DistributionData.HorizontalRange.Y)};
-	
-	double Z {FMath::RandRange(DistributionData.VerticalRange * 0.5, DistributionData.VerticalRange * -0.5)};
-	Z += DistributionData.VerticalOffset;
-
-	Transform.SetLocation(FVector(X, Y, Z));
-	return Transform;
-}

@@ -15,7 +15,12 @@ class AMBIVERSE_API UAmbiverseSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
-	DECLARE_LOG_CATEGORY_CLASS(LogAdaptiveAmbienceSystem, Log, All)
+	DECLARE_LOG_CATEGORY_CLASS(LogAmbiverseSubsystem, Log, All)
+
+public:
+#if !UE_BUILD_SHIPPING
+	TUniquePtr<FAutoConsoleCommand> SoundSourceVisualisationConsoleCommand;
+#endif
 
 private:
 	/** The sound source manager object. */
@@ -33,12 +38,18 @@ public:
 
 private:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual void Deinitialize() override;
 	
 	/** Processes an ambience event and updates the queue for an ambience layer.*/
-	void ProcessAmbienceLayerQueue(UAmbiverseLayer* Layer);
+	UFUNCTION()
+	void ProcessAmbienceLayerQueue(UAmbiverseLayer* Layer,  FAmbiverseLayerQueueEntry& Entry);
 
 	/** Checks if an ambience layer*/
 	UAmbiverseLayer* FindActiveAmbienceLayer(const UAmbiverseLayer* LayerToFind) const;
+
+#if !UE_BUILD_SHIPPING
+	void SetSoundSourceVisualisationEnabled(bool IsEnabled);
+#endif
 };
 
 

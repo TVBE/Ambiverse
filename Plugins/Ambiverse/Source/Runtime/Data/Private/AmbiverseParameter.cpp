@@ -1,4 +1,5 @@
-// Copyright 2023 Nino Saglia & Tim Verberne
+// Copyright (c) 2022-present Tim Verberne
+// This source code is part of the Adaptive Ambience System plugin
 
 #include "AmbiverseParameter.h"
 

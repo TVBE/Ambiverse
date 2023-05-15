@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "AmbiverseProceduralSoundData.h"
+#include "TimerManager.h"
 #include "AmbiverseLayer.generated.h"
 
 class UAmbiverseSoundSourceManager;
@@ -32,10 +33,12 @@ public:
 	TArray<FAmbiverseProceduralSoundData> ProceduralSounds;
 
 	UPROPERTY()
-	FTimerHandle TimerHandle;
+	TArray<FAmbiverseLayerQueueEntry> SoundQueue;
 
 	UPROPERTY()
-	TArray<FAmbiverseLayerQueueEntry> SoundQueue;
+	FTimerHandle TimerHandle;
+	
+	FTimerDelegate TimerDelegate;
 
 public:
 	bool GetEntryWithLowestTime(FAmbiverseLayerQueueEntry& OutEntry);

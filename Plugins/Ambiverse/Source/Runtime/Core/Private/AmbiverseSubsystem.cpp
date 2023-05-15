@@ -1,10 +1,12 @@
-// Copyright 2023 Nino Saglia & Tim Verberne
+// Copyright (c) 2022-present Tim Verberne
+// This source code is part of the Adaptive Ambience System plugin
 
 #include "AmbiverseSubsystem.h"
 #include "AmbiverseLayer.h"
+#include "AmbiverseSoundSourceData.h"
 #include "AmbiverseSoundSourceManager.h"
 
-DEFINE_LOG_CATEGORY_CLASS(UAmbiverseSubsystem, LogAdaptiveAmbienceSystem);
+DEFINE_LOG_CATEGORY_CLASS(UAmbiverseSubsystem, LogAmbiverseSubsystem);
 
 void UAmbiverseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
@@ -12,20 +14,41 @@ void UAmbiverseSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 	SoundSourceManager = NewObject<UAmbiverseSoundSourceManager>(this);
 
-	UE_LOG(LogAdaptiveAmbienceSystem, Log, TEXT("Adaptive Ambience System initialized successfully."))
+	if(SoundSourceManager)
+	{
+		SoundSourceManager->Initialize();
+	}
+
+#if !UE_BUILD_SHIPPING
+	// Define the console command.
+	SoundSourceVisualisationConsoleCommand = MakeUnique<FAutoConsoleCommand>(
+		TEXT("av.EnableSoundSourceVisualisation"),
+		TEXT("Enable or disable sound source visualisation."),
+		FConsoleCommandWithArgsDelegate::CreateLambda([this](const TArray<FString>& Args)
+		{
+			if (Args.Num() > 0)
+			{
+				// Parse the first argument as an integer, then convert to a bool.
+				SetSoundSourceVisualisationEnabled(FCString::Atoi(*Args[0]) != 0);
+			}
+		})
+	);
+#endif
+
+	UE_LOG(LogAmbiverseSubsystem, Log, TEXT("Adaptive Ambience System initialized successfully."))
 }
 
 void UAmbiverseSubsystem::AddAmbienceLayer(UAmbiverseLayer* Layer)
 {
 	if (!Layer)
 	{
-		UE_LOG(LogAdaptiveAmbienceSystem, Warning, TEXT("AddAmbienceLayer: No Layer provided."));
+		UE_LOG(LogAmbiverseSubsystem, Warning, TEXT("AddAmbienceLayer: No Layer provided."));
 		return;
 	}
 
 	if (Layer->ProceduralSounds.IsEmpty())
 	{
-		UE_LOG(LogAdaptiveAmbienceSystem, Warning, TEXT("AddAmbienceLayer: Layer has no procedural sounds: '%s'."), *Layer->GetName());
+		UE_LOG(LogAmbiverseSubsystem, Warning, TEXT("AddAmbienceLayer: Layer has no procedural sounds: '%s'."), *Layer->GetName());
 		return;
 	}
 
@@ -46,7 +69,7 @@ void UAmbiverseSubsystem::AddAmbienceLayer(UAmbiverseLayer* Layer)
 
 	if (!HasValidSoundData)
 	{
-		UE_LOG(LogAdaptiveAmbienceSystem, Warning, TEXT("AddAmbienceLayer: Layer has no valid procedural sounds: '%s'."), *Layer->GetName());
+		UE_LOG(LogAmbiverseSubsystem, Warning, TEXT("AddAmbienceLayer: Layer has no valid procedural sounds: '%s'."), *Layer->GetName());
 		return;
 	}
 
@@ -54,7 +77,7 @@ void UAmbiverseSubsystem::AddAmbienceLayer(UAmbiverseLayer* Layer)
 	if (!FindActiveAmbienceLayer(Layer))
 	{
 		ActiveLayers.Add(Layer);
-		UE_LOG(LogAdaptiveAmbienceSystem, Verbose, TEXT("AddAmbienceLayer: Layer added successfully: '%s'."), *Layer->GetName());
+		UE_LOG(LogAmbiverseSubsystem, Verbose, TEXT("AddAmbienceLayer: Layer added successfully: '%s'."), *Layer->GetName());
 	}
 }
 
@@ -75,32 +98,65 @@ UAmbiverseLayer* UAmbiverseSubsystem::FindActiveAmbienceLayer(const UAmbiverseLa
 	return nullptr;
 }
 
-void UAmbiverseSubsystem::ProcessAmbienceLayerQueue(UAmbiverseLayer* Layer)
+void UAmbiverseSubsystem::ProcessAmbienceLayerQueue(UAmbiverseLayer* Layer, FAmbiverseLayerQueueEntry& Entry)
 {
 	if (!Layer) { return; }
-	if (FAmbiverseLayerQueueEntry Entry; Layer->GetEntryWithLowestTime(Entry))
+
+	Layer->SubtractTimeFromQueue(Entry.Time);
+	Entry.Time = FMath::RandRange(Entry.SoundData.DelayMin, Entry.SoundData.DelayMax);
+
+	/** We try to get the location of the listener here.*/
+	FVector CameraLocation;
+	bool IsCameraValid {false};
+		
+	if (APlayerController* PlayerController {GetWorld()->GetFirstPlayerController()})
 	{
-		
-		Entry.Time = FMath::RandRange(Entry.SoundData.DelayMin, Entry.SoundData.DelayMax);
-
-		FVector CameraLocation;
-		bool IsCameraValid {false};
-		
-		if (APlayerController* PlayerController {GetWorld()->GetFirstPlayerController()})
+		if (const APlayerCameraManager* CameraManager {PlayerController->PlayerCameraManager})
 		{
-			if (const APlayerCameraManager* CameraManager {PlayerController->PlayerCameraManager})
-			{
-				CameraLocation = CameraManager->GetCameraLocation();
-				IsCameraValid = true;
-			}
+			CameraLocation = CameraManager->GetCameraLocation();
+			IsCameraValid = true;
 		}
+	}
 
-		if (!IsCameraValid) { return; }
+	if (!IsCameraValid) { return; }
 
-		// FTransform SoundTransform {FSoundDistributionData::GetSoundTransform(Entry.SoundData.DistributionData) + FTransform(CameraLocation)};
+	/** Prepare the sound source data. */
+	FAmbiverseSoundSourceData SoundSourceData {FAmbiverseSoundSourceData()};
+		
+	SoundSourceData.Transform = FAmbiverseSoundDistributionData::GetSoundTransform(Entry.SoundData.DistributionData, CameraLocation);
+	SoundSourceData.Sound = FAmbiverseProceduralSoundData::GetSoundFromMap(Entry.SoundData.Sounds);
+	SoundSourceData.Volume = Entry.SoundData.Volume;
+	SoundSourceData.Name = Entry.SoundData.Name;
+	SoundSourceData.Layer = Layer;
+
+	/** Update the timer handle and timer delegate for the layer. */
+	if (FAmbiverseLayerQueueEntry LowestTimeEntry; Layer->GetEntryWithLowestTime(LowestTimeEntry))
+	{
+		const float NewTime {LowestTimeEntry.Time};
+
+		Layer->TimerDelegate.BindUFunction(this, FName("ProcessAmbienceLayerQueue"), Layer, LowestTimeEntry);
+
+		GetWorld()->GetTimerManager().SetTimer(Layer->TimerHandle, Layer->TimerDelegate, NewTime, false);
 	}
 }
 
+#if !UE_BUILD_SHIPPING
+void UAmbiverseSubsystem::SetSoundSourceVisualisationEnabled(bool IsEnabled)
+{
+	if (SoundSourceManager)
+	{
+		SoundSourceManager->SetSoundSourceVisualisationEnabled(IsEnabled);
+	}
+}
+#endif
 
+void UAmbiverseSubsystem::Deinitialize()
+{
+	if (SoundSourceManager)
+	{
+		SoundSourceManager->Deinitialize();
+	}
+	Super::Deinitialize();
+}
 
 

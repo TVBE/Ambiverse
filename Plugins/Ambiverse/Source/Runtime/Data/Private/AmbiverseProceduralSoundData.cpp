@@ -1,4 +1,6 @@
-﻿
+﻿// Copyright (c) 2022-present Tim Verberne
+// This source code is part of the Adaptive Ambience System plugin
+
 #include "AmbiverseProceduralSoundData.h"
 
 DEFINE_LOG_CATEGORY(LogProceduralSoundData)
@@ -44,3 +46,33 @@ bool FAmbiverseProceduralSoundData::Validate(FAmbiverseProceduralSoundData& Soun
 	}
 	return SoundData.IsValid;
 }
+
+UMetaSoundSource* FAmbiverseProceduralSoundData::GetSoundFromMap(const TMap<UMetaSoundSource*, int>& SoundMap)
+{
+	int32 TotalWeight {0};
+		
+	for (const auto& Pair : SoundMap)
+	{
+		const int32 Weight {FMath::Max(Pair.Value, 1)}; 
+		TotalWeight += Weight;
+	}
+
+	if (TotalWeight > 0)
+	{
+		int32 RandomValue {FMath::RandRange(1, TotalWeight)};
+		
+		for (const auto& Pair : SoundMap)
+		{
+			int32 Weight {FMath::Max(Pair.Value, 1)}; 
+			
+			RandomValue -= Weight;
+			if (RandomValue <= 0)
+			{
+				return Pair.Key;
+			}
+		}
+	}
+	
+	return nullptr;
+}
+
