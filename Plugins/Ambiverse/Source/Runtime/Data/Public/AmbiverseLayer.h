@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AmbiverseParameter.h"
 #include "AmbiverseProceduralSoundData.h"
 #include "TimerManager.h"
 #include "AmbiverseLayer.generated.h"
@@ -38,8 +39,8 @@ public:
 	FName Name;
 
 	/** A description for the layer. */
-	UPROPERTY(EditAnywhere, Category = "Layer", Meta = (EditCondition = "IsEnabled", MultiLine))
-	FName Description;
+	UPROPERTY(EditAnywhere, Category = "Layer", Meta = (EditCondition = "IsEnabled", MultiLine = "true"))
+	FText Description;
 #endif
 	
 	/** The color of the layer when visualised in the editor. */
@@ -52,7 +53,7 @@ public:
 
 	/** Parameters that influence all procedural sounds in this layer. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Parameters", Meta = (TitleProperty = "Name", EditCondition = "IsEnabled"))
-	TArray<UAmbiverseParameter*> Parameters;
+	TArray<FAmbiverseParameterModifiers> Parameters;
 
 	/** Volume multiplier for all sounds in this layer. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (DisplayName = "Volume", ClampMin = "0", ClampMax = "2", UIMin = "1", UIMax ="2"))
