@@ -27,11 +27,23 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Distribution", Meta = (EditCondition = "DistributorClass == nullptr", ShowOnlyInnerProperties))
 	FAmbiverseSoundDistributionData DistributionData;
 
-	/** The SoundSource class to use to for this element. */
+	/**
+	 *  Custom SoundSource classes can be used to implement complex behavior for specific sounds.
+	 *  You can create a blueprint derived from UAmbiverseSoundSource to script custom behavior.
+	 *  @see AAmbiverseSoundSource.
+	 *	@brief The soundsource class to use for this element.
+	 */
 	UPROPERTY(EditAnywhere, Category = "Advanced")
 	TSubclassOf<AAmbiverseSoundSource> SoundSourceClass {AAmbiverseSoundSource::StaticClass()};
 
-	/** The distributor to use for this element. */
+	/**
+	 *  Custom distributors can be used to implement complex environment-aware placement behavior that is not available
+	 *  in the default Ambiverse implementation. You can create a blueprint derived from UAmbiverseDistributor to script custom behavior.
+	 *	Setting this property will override the distribution data, as the distributor will manage the placement behavior of this element instead.
+	 *	@see UAmbiverseDistributorAsset.
+	 *	@brief The distributor class to use for this element.
+	 *	@note Setting this property causes the distribution data to be ignored and to become uneditable.
+	 */
 	UPROPERTY(EditAnywhere, Category = "Advanced", Meta = (BlueprintBaseOnly))
 	TSubclassOf<UAmbiverseDistributorAsset> DistributorClass;
 
