@@ -23,17 +23,17 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Sound")
 	TSoftObjectPtr<UMetaSoundSource> Sound;
 	
-	/** The distributor to use for this element. */
-	UPROPERTY(EditAnywhere, Category = "Distribution", Meta = (BlueprintBaseOnly))
-	TSubclassOf<UAmbiverseDistributorAsset> DistributorClass;
-	
 	/** PlayRange data for an AmbienceSystem preset entry. */
-	UPROPERTY(EditAnywhere, Category = "Distribution", Meta = (EditCondition = "DistributorClass == nullptr"))
+	UPROPERTY(EditAnywhere, Category = "Distribution", Meta = (EditCondition = "DistributorClass == nullptr", ShowOnlyInnerProperties))
 	FAmbiverseSoundDistributionData DistributionData;
 
 	/** The SoundSource class to use to for this element. */
-	UPROPERTY(EditAnywhere, Category = "Sound Source")
+	UPROPERTY(EditAnywhere, Category = "Advanced")
 	TSubclassOf<AAmbiverseSoundSource> SoundSourceClass {AAmbiverseSoundSource::StaticClass()};
+
+	/** The distributor to use for this element. */
+	UPROPERTY(EditAnywhere, Category = "Advanced", Meta = (BlueprintBaseOnly))
+	TSubclassOf<UAmbiverseDistributorAsset> DistributorClass;
 
 public:
 	bool IsValid {true};
