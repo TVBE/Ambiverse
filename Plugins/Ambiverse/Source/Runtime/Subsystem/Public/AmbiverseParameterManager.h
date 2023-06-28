@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmbiverseLayer.h"
+#include "AmbiverseLayerAsset.h"
 #include "AmbiverseSubsystemComponent.h"
 #include "AmbiverseParameterManager.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnParameterChangedDelegate, UAmbiverseParameter*, ChangedParameter);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnParameterChangedDelegate, UAmbiverseParameterAsset*, ChangedParameter);
 
-class UAmbiverseLayer;
-class UAmbiverseParameter;
+class UAmbiverseLayerAsset;
+class UAmbiverseParameterAsset;
 
 UCLASS()
 class UAmbiverseParameterManager : public UAmbiverseSubsystemComponent
@@ -26,26 +26,26 @@ public:
 private:
 	/** The Ambiverse parameters that are currently registered to the system. */
 	UPROPERTY(Transient)
-	TArray<UAmbiverseParameter*> ParameterRegistry;
+	TArray<UAmbiverseParameterAsset*> ParameterRegistry;
 
 public:
 	virtual void Initialize(UAmbiverseSubsystem* Subsystem) override;
 	virtual void Deinitialize(UAmbiverseSubsystem* Subsystem) override;
 	
-	void GetScalarsForLayer(float& DensityScalar, float& VolumeScalar, const UAmbiverseLayer* Layer);
+	float GetParameterValue(UAmbiverseParameterAsset* Parameter);
 
 	UFUNCTION(BlueprintCallable)
-	void SetParameterValue(UAmbiverseParameter* Parameter, const float Value);
+	void SetParameterValue(UAmbiverseParameterAsset* Parameter, const float Value);
 
 private:
-	void RegisterParameter(UAmbiverseParameter* Parameter);
+	void RegisterParameter(UAmbiverseParameterAsset* Parameter);
 	
-	bool IsParameterRegistered(const UAmbiverseParameter* Parameter) const;
+	bool IsParameterRegistered(const UAmbiverseParameterAsset* Parameter) const;
 
 	UFUNCTION()
-	void HandleOnLayerRegistered(UAmbiverseLayer* RegisteredLayer);
+	void HandleOnLayerRegistered(UAmbiverseLayerAsset* RegisteredLayer);
 
 public:
 	/** Returns an array of currently registered parameters. */
-	FORCEINLINE TArray<UAmbiverseParameter*> GetRegisteredParameters() const { return ParameterRegistry; }
+	FORCEINLINE TArray<UAmbiverseParameterAsset*> GetRegisteredParameters() const { return ParameterRegistry; }
 };

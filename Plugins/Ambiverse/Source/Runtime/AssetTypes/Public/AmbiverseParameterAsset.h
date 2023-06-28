@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmbiverseParameter.generated.h"
+#include "AmbiverseParameterAsset.generated.h"
 
 /** An ambiverse layer is an instanced parameter that can be set through the ParameterManager in the AmbiverseSubsystem.
  *	Users can link modifiers to a parameter to change the density and volume of procedural sounds. */
 UCLASS(Blueprintable, BlueprintType, ClassGroup = "Ambiverse", Meta = (DisplayName = "Ambiverse Parameter",
 	ShortToolTip = "A parameter that can be used to drive procedural ambience."))
-class AMBIVERSE_API UAmbiverseParameter : public UObject
+class AMBIVERSE_API UAmbiverseParameterAsset : public UObject
 {
 	GENERATED_BODY()
 	
@@ -40,11 +40,8 @@ struct FAmbiverseParameterModifiers
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UAmbiverseParameter* Parameter {nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = "0", ClampMax = "2", UIMin = "0", UIMax = "2"))
-	FVector2D VolumeRange {FVector2D(1, 1)};
-
+	UAmbiverseParameterAsset* Parameter {nullptr};
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Meta = (ClampMin = "0", ClampMax = "10", UIMin = "0", UIMax = "10"))
 	FVector2D DensityRange {FVector2D(1, 1)};
 };

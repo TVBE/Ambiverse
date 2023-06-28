@@ -6,15 +6,16 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "AmbiverseSubsystem.generated.h"
 
-class UAmbiverseProceduralElement;
+class UAmbiverseElementManager;
+class UAmbiverseElementInstance;
 class UAmbiverseVisualisationComponent;
 class UAmbiverseDistributorManager;
 class UAmbiverseLayerManager;
 class UAmbiverseParameterManager;
 class UAmbiverseSoundSourceManager;
-class UAmbiverseLayer;
+class UAmbiverseLayerAsset;
 
-UCLASS(Transient, ClassGroup = "Ambiverse")
+UCLASS(Transient, ClassGroup = "Ambiverse", Meta = (DisplayName = "Ambiverse"))
 class AMBIVERSE_API UAmbiverseSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
@@ -34,6 +35,9 @@ private:
 	UPROPERTY()
 	UAmbiverseDistributorManager* DistributorManager {nullptr};
 
+	UPROPERTY()
+	UAmbiverseElementManager* ElementManager {nullptr};
+
 #if !UE_BUILD_SHIPPING
 	TStrongObjectPtr<UAmbiverseVisualisationComponent> VisualisationComponent {nullptr};
 #endif
@@ -45,26 +49,32 @@ public:
 	{
 		RETURN_QUICK_DECLARE_CYCLE_STAT(UAmbiverseSubsystem, STATGROUP_Tickables);
 	}
+
+	/** Adds an ambiverse layer to the subsystem if the layer is not already active. */
+	bool AddAmbiverseLayer(UAmbiverseLayerAsset* Asset);
 	
-	UFUNCTION()
-	void PlayProceduralElement(UAmbiverseProceduralElement* ProceduralElement);
+	/**
+	 *	Removes an Ambiverse layer from the subsystem if the layer is currently active.
+	 *	@param Asset The layer to remove.
+	 *	@param ForceStop If true, all elements from the layer that are currently playing are stopped.
+	 *	@param FadeTime An optional fade time for all elements to make the deactivation less noticable.
+	 *	@return Whether the specified layer was found and removed succesfully. This will be true if some of the layer's elements are still playing.
+	 */
+	bool RemoveAmbiverseLayer(UAmbiverseLayerAsset* Asset, const bool ForceStop = false, const float FadeTime = 1.0f);
 
 private:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-	
 	virtual void Tick(float DeltaTime) override;
-	
-	//UFUNCTION()
-	//void HandleParameterChanged();
 
 public:
 	FORCEINLINE UAmbiverseLayerManager* GetLayerManager() const { return LayerManager; }
 	FORCEINLINE UAmbiverseParameterManager* GetParameterManager() const { return ParameterManager; }
 	FORCEINLINE UAmbiverseSoundSourceManager* GetSoundSourceManager() const { return SoundSourceManager; }
 	FORCEINLINE UAmbiverseDistributorManager* GetDistributorManager() const { return DistributorManager; }
+	FORCEINLINE UAmbiverseElementManager* GetElementManager() const { return ElementManager; }
 };
 
 

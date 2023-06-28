@@ -5,7 +5,7 @@
 #include "MetasoundSource.h"
 #include "AmbiverseSoundSourceData.generated.h"
 
-class UAmbiverseLayer;
+class UAmbiverseLayerAsset;
 
 /** Contains data that can be used by an AmbienceSoundSource instance. */
 USTRUCT(BlueprintType)

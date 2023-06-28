@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmbiverseParameter.h"
-#include "AmbiverseProceduralElementData.h"
+#include "AmbiverseParameterAsset.h"
+#include "AmbiverseElementRuntimeData.h"
 #include "TimerManager.h"
-#include "AmbiverseLayer.generated.h"
+#include "AmbiverseLayerAsset.generated.h"
 
-class UAmbiverseProceduralElement;
+class UAmbiverseElementInstance;
 class UAmbiverseSubsystem;
-class UAmbiverseParameter;
+class UAmbiverseParameterAsset;
 class UAmbiverseSoundSourceManager;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = "Ambiverse", Meta = (DisplayName = "Ambiverse Layer",
 	ShortToolTip = "A list of Ambiverse Elements that can be procedurally played."))
-class AMBIVERSE_API UAmbiverseLayer : public UObject
+class AMBIVERSE_API UAmbiverseLayerAsset : public UObject
 {
 	GENERATED_BODY()
 
@@ -38,7 +38,7 @@ public:
 	
 	/** the procedural sound data of this layer. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Elements", Meta = (DisplayName = "Elements", TitleProperty = "Element"))
-	TArray<FAmbiverseProceduralElementData> ProceduralElementData;
+	TArray<FAmbiverseElementRuntimeData> Elements;
 	
 	/** Parameters that influence all procedural sounds in this layer. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Parameters", Meta = (TitleProperty = "Parameter"))
@@ -64,43 +64,6 @@ public:
 
 	float ActiveDuration {0.0f};
 
-	/** @brief The normalized ratio of the active duration of the layer relative to its maximum lifetime.
-	* This property provides a normalized value indicating how much of the layer's total lifetime has been used up.
-	* It is calculated as the active duration divided by the total lifetime. 
-	* For instance, if the active duration is 20 seconds and the total lifetime is 40 seconds, LifetimePercentage will be 0.5. */
-	float LifetimeRatio {0.0f};
-	
-	UPROPERTY()
-	FTimerHandle TimerHandle;
-	
-	FTimerDelegate TimerDelegate;
-
-public:
-	UPROPERTY(Transient)
-	TArray<UAmbiverseProceduralElement*> ProceduralElements;
-
-private:
-	UPROPERTY(Transient)
-	UAmbiverseSubsystem* AmbiverseSubsystem;
-
-	bool IsInitialized {false};
-	
-	float TimeActive {0.0f};
-
-public:
-	UFUNCTION()
-	bool Initialize(UAmbiverseSubsystem* Subsystem);
-	
-	void Update(float DeltaTime);
-	
-private:
-	/** Primes the layer to prevent a long time of silence before the first element interval is completed.
-	 *	This basically moves the entire timeline of the layer forward based on the shortest interval. */
-	void Prime(const uint16 Count = 5);
-
-	void SetNewTimeForProceduralElement(UAmbiverseProceduralElement* ProceduralElement);
-
-public:
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif

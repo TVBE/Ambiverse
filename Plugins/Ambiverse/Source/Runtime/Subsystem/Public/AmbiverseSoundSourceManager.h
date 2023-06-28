@@ -7,7 +7,7 @@
 #include "AmbiverseSubsystemComponent.h"
 #include "AmbiverseSoundSourceManager.generated.h"
 
-class UAmbiverseProceduralElement;
+class UAmbiverseElementInstance;
 class AAmbiverseSoundSource;
 
 UCLASS()
@@ -31,7 +31,7 @@ private:
 #endif
 
 public:
-	void PlayElement(UAmbiverseProceduralElement* ProceduralElement);
+	void PlayElement(UAmbiverseElementInstance* ProceduralElement);
 	
 	void InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData);
 

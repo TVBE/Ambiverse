@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "AmbiverseElement.h"
-#include "AmbiverseProceduralElementData.generated.h"
+#include "AmbiverseElementAsset.h"
+#include "AmbiverseElementRuntimeData.generated.h"
 
-class UAmbiverseElement;
+class UAmbiverseElementAsset;
 
 UENUM(BlueprintType)
 enum class EIntervalMode : uint8
@@ -16,12 +16,12 @@ enum class EIntervalMode : uint8
 
 /** Defines the spawning behavior of a spatial AmbienceSoundSource */
 USTRUCT(BlueprintType)
-struct FAmbiverseProceduralElementData
+struct FAmbiverseElementRuntimeData
 {
 	GENERATED_USTRUCT_BODY()
 	
 	UPROPERTY(EditAnywhere)
-	UAmbiverseElement* Element {nullptr};
+	UAmbiverseElementAsset* Element {nullptr};
 
 	/** The volume of this element. */
 	UPROPERTY(EditAnywhere, Meta = (ClampMin = "0", ClampMax = "2", UIMin = "0", UIMax = "2"))

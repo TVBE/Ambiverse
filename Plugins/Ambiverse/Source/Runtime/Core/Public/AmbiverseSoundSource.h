@@ -8,7 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "AmbiverseSoundSource.generated.h"
 
-class UAmbiverseLayer;
+class UAmbiverseLayerAsset;
 class UAmbiverseSoundSourceManager;
 
 UCLASS(Blueprintable, BlueprintType, NotPlaceable, ClassGroup = "Ambiverse")

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "AmbiverseDistributor.generated.h"
+#include "AmbiverseDistributorAsset.generated.h"
 
 
-class UAmbiverseElement;
+class UAmbiverseElementAsset;
 UCLASS(Abstract, Blueprintable, BlueprintType, ClassGroup = "Ambiverse", Meta = (DisplayName = "Ambiverse Distributor",
 	ShortToolTip = "A distributor allows for blueprint scripting of custom spawn behavior."))
-class AMBIVERSE_API UAmbiverseDistributor : public UObject
+class AMBIVERSE_API UAmbiverseDistributorAsset : public UObject
 {
 	GENERATED_BODY()
 
@@ -24,7 +24,7 @@ public:
 	void Activate(UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintImplementableEvent, Meta = (WorldContext = "WorldContextObject"))
-	bool ExecuteDistribution(UObject* WorldContextObject, FTransform& Transform, FVector Location, UAmbiverseElement* Element);
+	bool ExecuteDistribution(UObject* WorldContextObject, FTransform& Transform, FVector Location, UAmbiverseElementAsset* Element);
 
 	/** Gets a random point in a specified radius around the listener. */
 	UFUNCTION(BlueprintCallable)

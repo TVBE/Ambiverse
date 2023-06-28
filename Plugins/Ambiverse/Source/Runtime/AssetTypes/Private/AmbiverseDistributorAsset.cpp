@@ -1,10 +1,10 @@
 // Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
-#include "AmbiverseDistributor.h"
+#include "AmbiverseDistributorAsset.h"
 
-DEFINE_LOG_CATEGORY_CLASS(UAmbiverseDistributor, LogAmbiverseDistributor);
+DEFINE_LOG_CATEGORY_CLASS(UAmbiverseDistributorAsset, LogAmbiverseDistributor);
 
-void UAmbiverseDistributor::Activate(UObject* WorldContextObject)
+void UAmbiverseDistributorAsset::Activate(UObject* WorldContextObject)
 {
 	if (WorldContextObject)
 	{
@@ -18,7 +18,7 @@ void UAmbiverseDistributor::Activate(UObject* WorldContextObject)
 	}
 }
 
-FVector UAmbiverseDistributor::GetRandomPointInRadiusAroundListener(float Radius)
+FVector UAmbiverseDistributorAsset::GetRandomPointInRadiusAroundListener(float Radius)
 {
 	if (!Listener)
 	{
@@ -36,7 +36,7 @@ FVector UAmbiverseDistributor::GetRandomPointInRadiusAroundListener(float Radius
 	return FVector{X, Y, Z};
 }
 
-FVector UAmbiverseDistributor::GetPointAtDistanceAndAngleFromListener(float Distance, float Angle)
+FVector UAmbiverseDistributorAsset::GetPointAtDistanceAndAngleFromListener(float Distance, float Angle)
 {
 	if (!Listener)
 	{
@@ -51,7 +51,7 @@ FVector UAmbiverseDistributor::GetPointAtDistanceAndAngleFromListener(float Dist
 	return FVector{X, Y, Z};
 }
 
-void UAmbiverseDistributor::SnapToFloor(FVector& Location, float Offset)
+void UAmbiverseDistributorAsset::SnapToFloor(FVector& Location, float Offset)
 {
 	if (UWorld* World {GetWorldFromListener()})
 	{
@@ -81,7 +81,7 @@ void UAmbiverseDistributor::SnapToFloor(FVector& Location, float Offset)
 	}
 }
 
-void UAmbiverseDistributor::SetLocationByTrace(FVector& Location, float Offset)
+void UAmbiverseDistributorAsset::SetLocationByTrace(FVector& Location, float Offset)
 {
 	UWorld* World = GetWorldFromListener();
 	if (!World)
@@ -115,7 +115,7 @@ void UAmbiverseDistributor::SetLocationByTrace(FVector& Location, float Offset)
 	}
 }
 
-UWorld* UAmbiverseDistributor::GetWorldFromListener()
+UWorld* UAmbiverseDistributorAsset::GetWorldFromListener()
 {
 	if (!Listener)
 	{

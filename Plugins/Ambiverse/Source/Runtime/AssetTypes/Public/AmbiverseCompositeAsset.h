@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AmbiverseComposite.generated.h"
+#include "AmbiverseCompositeAsset.generated.h"
 
-class UAmbiverseLayer;
+class UAmbiverseLayerAsset;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup = "Ambiverse", Meta = (DisplayName = "Ambiverse Composite",
 	ShortToolTip = "Collection of Ambiverse Layers that can be activated at once."))
-class AMBIVERSE_API UAmbiverseComposite : public UObject
+class AMBIVERSE_API UAmbiverseCompositeAsset : public UObject
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Layers", Meta = (TitleProperty = "{Name}"))
-	TArray<UAmbiverseLayer*> Layers;
+	TArray<UAmbiverseLayerAsset*> Layers;
 
 	/** If true, all layers that are not part of this composite are popped when this composite is pushed. */
 	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (DisplayName = "Stop Non-Composite layers"))

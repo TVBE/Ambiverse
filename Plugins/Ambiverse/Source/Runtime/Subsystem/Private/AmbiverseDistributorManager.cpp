@@ -1,16 +1,16 @@
 // Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #include "AmbiverseDistributorManager.h"
-#include "AmbiverseDistributor.h"
+#include "AmbiverseDistributorAsset.h"
 #include "AmbiverseSubsystem.h"
 
 DEFINE_LOG_CATEGORY_CLASS(UAmbiverseDistributorManager, LogAmbiverseDistributorManager);
 
-UAmbiverseDistributor* UAmbiverseDistributorManager::GetDistributorByClass(TSubclassOf<UAmbiverseDistributor> Class)
+UAmbiverseDistributorAsset* UAmbiverseDistributorManager::GetDistributorByClass(TSubclassOf<UAmbiverseDistributorAsset> Class)
 {
 	if (!Owner) { return nullptr ; }
 	
-	for (UAmbiverseDistributor* Distributor : Distributors)
+	for (UAmbiverseDistributorAsset* Distributor : Distributors)
 	{
 		if (Distributor->StaticClass() == Class)
 		{
@@ -20,7 +20,7 @@ UAmbiverseDistributor* UAmbiverseDistributorManager::GetDistributorByClass(TSubc
 	}
 
 	/** If no instance of the specified distributor class was found, we instance a new one and return it. */
-	UAmbiverseDistributor* Distributor = NewObject<UAmbiverseDistributor>(this, Class.Get());
+	UAmbiverseDistributorAsset* Distributor = NewObject<UAmbiverseDistributorAsset>(this, Class.Get());
 	UE_LOG(LogAmbiverseDistributorManager, Verbose, TEXT("GetDistributorByClass: Created new distributor of class: %s"), *Class->GetName());
 
 	if (Distributor)

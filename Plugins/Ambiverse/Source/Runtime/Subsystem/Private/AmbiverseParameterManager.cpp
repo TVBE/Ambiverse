@@ -2,7 +2,7 @@
 
 #include "AmbiverseParameterManager.h"
 #include "AmbiverseLayerManager.h"
-#include "AmbiverseParameter.h"
+#include "AmbiverseParameterAsset.h"
 #include "AmbiverseSubsystem.h"
 
 DEFINE_LOG_CATEGORY_CLASS(UAmbiverseParameterManager, LogAmbiverseParameterManager);
@@ -17,56 +17,30 @@ void UAmbiverseParameterManager::Initialize(UAmbiverseSubsystem* Subsystem)
 	}
 }
 
-void UAmbiverseParameterManager::GetScalarsForLayer(float& DensityScalar, float& VolumeScalar, const UAmbiverseLayer* Layer)
+float UAmbiverseParameterManager::GetParameterValue(UAmbiverseParameterAsset* Parameter)
 {
-	DensityScalar = 1.0f;
-	VolumeScalar = 1.0f;
+	if (!Parameter) { return 1.0f; }
 	
-	if (!Layer) { return; }
-	
-	TArray<FAmbiverseParameterModifiers> Parameters;
-	
-	Parameters.Append(Layer->Parameters);
-	// Parameters.Append(ProceduralElement.Element.Parameters); // For now, we're not implementing parameters inside elements.
-	
-	if (Parameters.IsEmpty()) { return; }
-
-	for (const FAmbiverseParameterModifiers& Modifier : Parameters)
+	for (UAmbiverseParameterAsset* ActiveParameter : ParameterRegistry)
 	{
-		UAmbiverseParameter* RegisteredParameter {nullptr};
-		
-		for (UAmbiverseParameter* Parameter : ParameterRegistry)
+		if (Parameter == ActiveParameter)
 		{
-			if (Parameter == Modifier.Parameter)
-			{
-				RegisteredParameter = Parameter;
-				break;
-			}
+			return ActiveParameter->ParameterValue;
 		}
-
-		if (!RegisteredParameter)
-		{
-			RegisterParameter(Modifier.Parameter);
-			continue;
-		}
-
-		DensityScalar *= FMath::GetMappedRangeValueClamped(FVector2D(0, 1), Modifier.DensityRange, RegisteredParameter->ParameterValue);
-		VolumeScalar *= FMath::GetMappedRangeValueClamped(FVector2D(0, 1), Modifier.VolumeRange, RegisteredParameter->ParameterValue);
 	}
 
-	DensityScalar *= Layer->LayerDensity;
-	DensityScalar = 1 / DensityScalar;
-	VolumeScalar *= Layer->LayerVolume;
+	RegisterParameter(Parameter);
+	return Parameter->ParameterValue;
 }
 
-void UAmbiverseParameterManager::SetParameterValue(UAmbiverseParameter* Parameter, const float Value)
+void UAmbiverseParameterManager::SetParameterValue(UAmbiverseParameterAsset* Parameter, const float Value)
 {
 	if (ParameterRegistry.IsEmpty())
 	{
 		RegisterParameter(Parameter);
 	}
 
-	for (UAmbiverseParameter* AmbiverseParameter : ParameterRegistry)
+	for (UAmbiverseParameterAsset* AmbiverseParameter : ParameterRegistry)
 	{
 		if (AmbiverseParameter == Parameter)
 		{
@@ -78,7 +52,7 @@ void UAmbiverseParameterManager::SetParameterValue(UAmbiverseParameter* Paramete
 	OnParameterChangedDelegate.Broadcast(Parameter);
 }
 
-void UAmbiverseParameterManager::RegisterParameter(UAmbiverseParameter* Parameter)
+void UAmbiverseParameterManager::RegisterParameter(UAmbiverseParameterAsset* Parameter)
 {
 	if (!Parameter) { return; }
 	if (!IsParameterRegistered(Parameter))
@@ -88,7 +62,7 @@ void UAmbiverseParameterManager::RegisterParameter(UAmbiverseParameter* Paramete
 	}
 }
 
-bool UAmbiverseParameterManager::IsParameterRegistered(const UAmbiverseParameter* Parameter) const
+bool UAmbiverseParameterManager::IsParameterRegistered(const UAmbiverseParameterAsset* Parameter) const
 {
 	if (!Parameter) { return false; }
 	if (ParameterRegistry.Contains(Parameter))
@@ -98,13 +72,13 @@ bool UAmbiverseParameterManager::IsParameterRegistered(const UAmbiverseParameter
 	return false;
 }
 
-void UAmbiverseParameterManager::HandleOnLayerRegistered(UAmbiverseLayer* RegisteredLayer)
+void UAmbiverseParameterManager::HandleOnLayerRegistered(UAmbiverseLayerAsset* RegisteredLayer)
 {
 	if (!RegisteredLayer) { return; }
 
 	UE_LOG(LogAmbiverseParameterManager, Verbose, TEXT("Updating parameter registry for: '%s'"), *RegisteredLayer->GetName());
 
-	TArray<UAmbiverseParameter*> RequiredParameters;
+	TArray<UAmbiverseParameterAsset*> RequiredParameters;
 
 	for (FAmbiverseParameterModifiers& ParameterModifiers : RegisteredLayer->Parameters)
 	{
@@ -119,7 +93,7 @@ void UAmbiverseParameterManager::HandleOnLayerRegistered(UAmbiverseLayer* Regist
 	// 	}
 	// }
 
-	for (UAmbiverseParameter* RequiredParameter : RequiredParameters)
+	for (UAmbiverseParameterAsset* RequiredParameter : RequiredParameters)
 	{
 		if (!ParameterRegistry.Contains(RequiredParameter))
 		{
