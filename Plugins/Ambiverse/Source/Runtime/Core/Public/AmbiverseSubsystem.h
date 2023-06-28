@@ -1,5 +1,4 @@
-// Copyright (c) 2022-present Tim Verberne
-// This source code is part of the Adaptive Ambience System plugin
+// Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #pragma once
 
@@ -7,52 +6,65 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "AmbiverseSubsystem.generated.h"
 
+class UAmbiverseProceduralElement;
+class UAmbiverseVisualisationComponent;
+class UAmbiverseDistributorManager;
+class UAmbiverseLayerManager;
+class UAmbiverseParameterManager;
 class UAmbiverseSoundSourceManager;
 class UAmbiverseLayer;
 
-UCLASS(ClassGroup = "Ambiverse")
-class AMBIVERSE_API UAmbiverseSubsystem : public UWorldSubsystem
+UCLASS(Transient, ClassGroup = "Ambiverse")
+class AMBIVERSE_API UAmbiverseSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
 	DECLARE_LOG_CATEGORY_CLASS(LogAmbiverseSubsystem, Log, All)
 
-public:
-#if !UE_BUILD_SHIPPING
-	TUniquePtr<FAutoConsoleCommand> SoundSourceVisualisationConsoleCommand;
-#endif
-
 private:
-	/** The sound source manager object. */
+	UPROPERTY()
+	UAmbiverseLayerManager* LayerManager {nullptr};
+	
+	UPROPERTY()
+	UAmbiverseParameterManager* ParameterManager {nullptr};
+
 	UPROPERTY()
 	UAmbiverseSoundSourceManager* SoundSourceManager {nullptr};
-	
-	/** The current active ambience layers. */
+
 	UPROPERTY()
-	TArray<UAmbiverseLayer*> ActiveLayers;
-
-public:
-	/** Adds a sound set*/
-	void AddAmbienceLayer(UAmbiverseLayer* Layer);
-	void PopAmbienceLayer(UAmbiverseLayer* Layer);
-
-private:
-	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-	virtual void Deinitialize() override;
-	
-	/** Processes an ambience event and updates the queue for an ambience layer.*/
-	UFUNCTION()
-	void ProcessAmbienceLayerQueue(UAmbiverseLayer* Layer,  FAmbiverseLayerQueueEntry& Entry);
-
-	/** Checks if an ambience layer*/
-	UAmbiverseLayer* FindActiveAmbienceLayer(const UAmbiverseLayer* LayerToFind) const;
-
-	static float GetSoundInterval(const UAmbiverseLayer* Layer, const FAmbiverseLayerQueueEntry& Entry);
-	static float GetSoundVolume(const UAmbiverseLayer* Layer, const FAmbiverseLayerQueueEntry& Entry);
+	UAmbiverseDistributorManager* DistributorManager {nullptr};
 
 #if !UE_BUILD_SHIPPING
-	void SetSoundSourceVisualisationEnabled(bool IsEnabled);
+	TStrongObjectPtr<UAmbiverseVisualisationComponent> VisualisationComponent {nullptr};
 #endif
+
+public:
+	UAmbiverseSubsystem();
+	
+	virtual TStatId GetStatId() const override
+	{
+		RETURN_QUICK_DECLARE_CYCLE_STAT(UAmbiverseSubsystem, STATGROUP_Tickables);
+	}
+	
+	UFUNCTION()
+	void PlayProceduralElement(UAmbiverseProceduralElement* ProceduralElement);
+
+private:
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
+	
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	
+	virtual void Tick(float DeltaTime) override;
+	
+	//UFUNCTION()
+	//void HandleParameterChanged();
+
+public:
+	FORCEINLINE UAmbiverseLayerManager* GetLayerManager() const { return LayerManager; }
+	FORCEINLINE UAmbiverseParameterManager* GetParameterManager() const { return ParameterManager; }
+	FORCEINLINE UAmbiverseSoundSourceManager* GetSoundSourceManager() const { return SoundSourceManager; }
+	FORCEINLINE UAmbiverseDistributorManager* GetDistributorManager() const { return DistributorManager; }
 };
 
 

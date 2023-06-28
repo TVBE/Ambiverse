@@ -13,12 +13,12 @@ FText FAmbiverseParameterAssetTypeActions::GetName() const
 
 UClass* FAmbiverseParameterAssetTypeActions::GetSupportedClass() const
 {
-	{ return UAmbiverseParameter::StaticClass(); }
+	return UAmbiverseParameter::StaticClass();
 }
 
 FColor FAmbiverseParameterAssetTypeActions::GetTypeColor() const
 {
-	return FColor(61, 0, 83);
+	return FColor(100, 50, 130);
 }
 
 uint32 FAmbiverseParameterAssetTypeActions::GetCategories()

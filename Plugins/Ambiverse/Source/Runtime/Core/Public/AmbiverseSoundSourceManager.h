@@ -1,16 +1,17 @@
-// Copyright (c) 2022-present Tim Verberne
-// This source code is part of the Adaptive Ambience System plugin
+// Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "AmbiverseSoundSourceData.h"
+#include "AmbiverseSubsystemComponent.h"
 #include "AmbiverseSoundSourceManager.generated.h"
 
+class UAmbiverseProceduralElement;
 class AAmbiverseSoundSource;
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup = "Ambiverse")
-class AMBIVERSE_API UAmbiverseSoundSourceManager : public UObject
+UCLASS()
+class UAmbiverseSoundSourceManager : public UAmbiverseSubsystemComponent
 {
 	GENERATED_BODY()
 
@@ -30,8 +31,7 @@ private:
 #endif
 
 public:
-	void Initialize();
-	void Deinitialize();
+	void PlayElement(UAmbiverseProceduralElement* ProceduralElement);
 	
 	void InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData);
 
@@ -41,4 +41,6 @@ public:
 #if !UE_BUILD_SHIPPING
 	void SetSoundSourceVisualisationEnabled(const bool IsEnabled);
 #endif
+
+	FORCEINLINE TArray<AAmbiverseSoundSource*> GetActiveSoundSources() const { return ActiveSoundSources; }
 };

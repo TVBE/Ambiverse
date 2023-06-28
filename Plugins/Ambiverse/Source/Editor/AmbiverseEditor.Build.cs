@@ -24,9 +24,9 @@ public class AmbiverseEditor : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"Core", 
-				"Ambiverse", 
+				"Core",
 				"AssetTools",
+				"Ambiverse"
 			}
 			);
 			
@@ -40,7 +40,7 @@ public class AmbiverseEditor : ModuleRules
 				"SlateCore",
 				"MetasoundEngine",
 				"Settings",
-				"UnrealEd"
+				"UnrealEd",
 			}
 			);
 		

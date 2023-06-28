@@ -11,25 +11,29 @@ void FAmbiverseEditorModule::StartupModule()
 {
 	IAssetTools& AssetTools {FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get()};
 	
-	//  FAssetToolsModule::GetModule().Get().RegisterAdvancedAssetCategory(FName("Sounds|Adaptive Ambience System"),
-	//	FText::FromString("Sounds|Adaptive Ambience System"));
-
 	UE_LOG(LogTemp, Error, TEXT("Startup"))
-	
-	AmbienceLayerAssetTypeActions = MakeShared<FAmbiverseLayerAssetTypeActions>();
-	FAssetToolsModule::GetModule().Get().RegisterAssetTypeActions(AmbienceLayerAssetTypeActions.ToSharedRef());
 
-	AmbienceParameterAssetTypeActions = MakeShared<FAmbiverseParameterAssetTypeActions>();
-	FAssetToolsModule::GetModule().Get().RegisterAssetTypeActions(AmbienceParameterAssetTypeActions.ToSharedRef());
+	AmbiverseElementAssetTypeActions = MakeShared<FAmbiverseElementAssetTypeActions>();
+	FAssetToolsModule::GetModule().Get().RegisterAssetTypeActions(AmbiverseElementAssetTypeActions.ToSharedRef());
+	
+	AmbiverseLayerAssetTypeActions = MakeShared<FAmbiverseLayerAssetTypeActions>();
+	FAssetToolsModule::GetModule().Get().RegisterAssetTypeActions(AmbiverseLayerAssetTypeActions.ToSharedRef());
+
+	AmbiverseCompositeAssetTypeActions = MakeShared<FAmbiverseCompositeAssetTypeActions>();
+	FAssetToolsModule::GetModule().Get().RegisterAssetTypeActions(AmbiverseCompositeAssetTypeActions.ToSharedRef());
+
+	AmbiverseParameterAssetTypeActions = MakeShared<FAmbiverseParameterAssetTypeActions>();
+	FAssetToolsModule::GetModule().Get().RegisterAssetTypeActions(AmbiverseParameterAssetTypeActions.ToSharedRef());
 }
 
 void FAmbiverseEditorModule::ShutdownModule()
 {
 	if (!FModuleManager::Get().IsModuleLoaded("AssetTools")) return;
-	
-	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(AmbienceLayerAssetTypeActions.ToSharedRef());
-	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(AmbienceParameterAssetTypeActions.ToSharedRef());
-	
+
+	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(AmbiverseElementAssetTypeActions.ToSharedRef());
+	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(AmbiverseLayerAssetTypeActions.ToSharedRef());
+	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(AmbiverseCompositeAssetTypeActions.ToSharedRef());
+	FAssetToolsModule::GetModule().Get().UnregisterAssetTypeActions(AmbiverseParameterAssetTypeActions.ToSharedRef());
 }
 
 IMPLEMENT_MODULE(FAmbiverseEditorModule, AmbiverseEditor)

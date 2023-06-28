@@ -1,23 +1,24 @@
-// Copyright (c) 2022-present Tim Verberne
-// This source code is part of the Adaptive Ambience System plugin
+// Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #include "AmbiverseSoundSourceManager.h"
 #include "AmbiverseSoundSource.h"
+#include "AmbiverseSubsystem.h"
 
 DEFINE_LOG_CATEGORY_CLASS(UAmbiverseSoundSourceManager, LogAmbiverseSoundSourceManager);
 
-void UAmbiverseSoundSourceManager::Initialize()
-{
-}
-
 void UAmbiverseSoundSourceManager::InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData)
 {
-	if (!SoundSourceData.Sound) { return; }
+	if (!SoundSourceData.Sound)
+	{
+		UE_LOG(LogAmbiverseSoundSourceManager, Warning, TEXT("InitiateSoundSource: SoundSourceData contains no valid sound."))
+		return;
+	}
 	AAmbiverseSoundSource* SoundSourceInstance {nullptr};
 	
 	if (Pool.Num() == 0)
 	{
-		SoundSourceInstance = GetWorld()->SpawnActor<AAmbiverseSoundSource>(AAmbiverseSoundSource::StaticClass());
+		SoundSourceInstance = Owner->GetWorld()->SpawnActor<AAmbiverseSoundSource>(AAmbiverseSoundSource::StaticClass());
+		UE_LOG(LogAmbiverseSoundSourceManager, Verbose, TEXT("InitiateSoundSource: Created new SoundSource instance."))
 	}
 	else
 	{
@@ -29,7 +30,8 @@ void UAmbiverseSoundSourceManager::InitiateSoundSource(FAmbiverseSoundSourceData
 		
 		if (!SoundSourceInstance)
 		{
-			SoundSourceInstance = GetWorld()->SpawnActor<AAmbiverseSoundSource>(AAmbiverseSoundSource::StaticClass());
+			SoundSourceInstance = Owner->GetWorld()->SpawnActor<AAmbiverseSoundSource>(AAmbiverseSoundSource::StaticClass());
+			UE_LOG(LogAmbiverseSoundSourceManager, Verbose, TEXT("InitiateSoundSource: Created new SoundSource instance."))
 		}
 	}
 	if (SoundSourceInstance)
@@ -66,9 +68,6 @@ void UAmbiverseSoundSourceManager::SetSoundSourceVisualisationEnabled(const bool
 }
 #endif
 
-void UAmbiverseSoundSourceManager::Deinitialize()
-{
-}
 
 
 

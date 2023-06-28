@@ -1,32 +1,49 @@
-// Copyright 2023 Nino Saglia & Tim Verberne
+// Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "AmbiverseLayer.h"
+#include "AmbiverseSubsystemComponent.h"
 #include "AmbiverseParameterManager.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnParameterChangedDelegate, UAmbiverseParameter*, ChangedParameter);
+
+class UAmbiverseLayer;
 class UAmbiverseParameter;
 
-UCLASS(NotBlueprintable, BlueprintType, ClassGroup = "Ambiverse")
-class AMBIVERSE_API UAmbiverseParameterManager : public UObject
+UCLASS()
+class UAmbiverseParameterManager : public UAmbiverseSubsystemComponent
 {
 	GENERATED_BODY()
 
 	DECLARE_LOG_CATEGORY_CLASS(LogAmbiverseParameterManager, Log, All)
 
+public:
+	UPROPERTY()
+	FOnParameterChangedDelegate OnParameterChangedDelegate;
+
 private:
 	/** The Ambiverse parameters that are currently registered to the system. */
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<UAmbiverseParameter*> ParameterRegistry;
 
 public:
+	virtual void Initialize(UAmbiverseSubsystem* Subsystem) override;
+	virtual void Deinitialize(UAmbiverseSubsystem* Subsystem) override;
 	
+	void GetScalarsForLayer(float& DensityScalar, float& VolumeScalar, const UAmbiverseLayer* Layer);
+
+	UFUNCTION(BlueprintCallable)
+	void SetParameterValue(UAmbiverseParameter* Parameter, const float Value);
 
 private:
-	void RegisterLayer(UAmbiverseParameter* Parameter);
+	void RegisterParameter(UAmbiverseParameter* Parameter);
 	
 	bool IsParameterRegistered(const UAmbiverseParameter* Parameter) const;
+
+	UFUNCTION()
+	void HandleOnLayerRegistered(UAmbiverseLayer* RegisteredLayer);
 
 public:
 	/** Returns an array of currently registered parameters. */

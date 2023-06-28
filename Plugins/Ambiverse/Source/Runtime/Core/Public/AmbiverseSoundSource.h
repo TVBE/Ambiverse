@@ -1,5 +1,4 @@
-// Copyright (c) 2022-present Tim Verberne
-// This source code is part of the Adaptive Ambience System plugin
+// Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #pragma once
 
@@ -41,10 +40,6 @@ private:
 	UPROPERTY()
 	FName SoundSourceName;
 
-	/** The layer the sound source belongs to. */
-	UPROPERTY()
-	UAmbiverseLayer* AmbiverseLayer {nullptr};
-
 public:	
 	AAmbiverseSoundSource();
 
@@ -58,12 +53,6 @@ public:
 		AudioComponent->SetSound(NewSound);
 	}
 
-	void SetVolume (const float NewVolume)
-	{
-		if (!AudioComponent) { return; }
-		AudioComponent->SetVolumeMultiplier(NewVolume);
-	}
-	
 protected:
 	virtual void BeginPlay() override;
 	
