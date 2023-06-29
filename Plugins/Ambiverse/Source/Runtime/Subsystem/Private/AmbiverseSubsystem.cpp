@@ -58,6 +58,10 @@ void UAmbiverseSubsystem::Tick(float DeltaTime)
 	{
 		LayerManager->Tick(DeltaTime);
 	}
+	if (ElementManager && ElementManager->IsInitialized)
+	{
+		ElementManager->Tick(DeltaTime);
+	}
 }
 
 bool UAmbiverseSubsystem::AddAmbiverseLayer(UAmbiverseLayerAsset* Asset)

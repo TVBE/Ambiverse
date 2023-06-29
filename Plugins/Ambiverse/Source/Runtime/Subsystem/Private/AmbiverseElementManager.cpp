@@ -13,11 +13,15 @@ void UAmbiverseElementManager::RegisterElements(TArray<UAmbiverseElementInstance
 	if (Elements.IsEmpty()) { return; }
 	
 	PrimeElements(Elements);
-	ScheduledProceduralElements.Append(Elements);
+	
+	ScheduledElementInstances.Append(Elements);
 
 	for (const UAmbiverseElementInstance* Element : Elements)
 	{
-		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Registered and scheduled element: '%s'"), *Element->GetName());
+		if (Element)
+		{
+			UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Registered and scheduled element: '%s'"), *Element->GetName());
+		}
 	}
 }
 
@@ -27,7 +31,7 @@ void UAmbiverseElementManager::UnregisterElements(TArray<UAmbiverseElementInstan
 
 	for (UAmbiverseElementInstance* ProceduralElement : Elements)
 	{
-		ScheduledProceduralElements.Remove(ProceduralElement);
+		ScheduledElementInstances.Remove(ProceduralElement);
 	}
 
 	for (UAmbiverseElementInstance* ProceduralElement : Elements)
@@ -50,7 +54,7 @@ void UAmbiverseElementManager::EvaluateFinishedElement(UAmbiverseElementInstance
 		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("EvaluateFinishedElement: Destroyed element due to being marked PendingKill: '%s'"), *Element->GetName());
 	}
 
-	if (Element->RuntimeData.IntervalMode == EIntervalMode::OnSpawn && ScheduledProceduralElements.Contains(Element))
+	if (Element->RuntimeData.IntervalMode == EIntervalMode::OnSpawn && ScheduledElementInstances.Contains(Element))
 	{
 		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("EvaluateFinishedElement: Element is already scheduled: '%s'"), *Element->GetName());
 		return;
@@ -64,37 +68,48 @@ void UAmbiverseElementManager::EvaluateFinishedElement(UAmbiverseElementInstance
 
 void UAmbiverseElementManager::Tick(const float DeltaTime)
 {
-	if (ScheduledProceduralElements.IsEmpty()) { return; }
+	if (ScheduledElementInstances.IsEmpty()) { return; }
 	
-	for (UAmbiverseElementInstance* ProceduralElement : ScheduledProceduralElements)
+	for (UAmbiverseElementInstance* ElementInstance : ScheduledElementInstances)
 	{
-		const float ScaleFactor {(ProceduralElement->Time - DeltaTime) / ProceduralElement->Time};
-		ProceduralElement->ReferenceTime *= ScaleFactor;
+		const float ScaleFactor {(ElementInstance->Time - DeltaTime) / ElementInstance->Time};
+		ElementInstance->ReferenceTime *= ScaleFactor;
 		
-		ProceduralElement->Time -= DeltaTime;
+		ElementInstance->Time -= DeltaTime;
 
-		if (ProceduralElement->Time <= 0)
+		if (ElementInstance->Time <= 0)
 		{
-			if (!Owner || !ProceduralElement) { return; }
+			if (!Owner || !ElementInstance) { return; }
 			
 			if (UAmbiverseSoundSourceManager* SoundSourceManager {Owner->GetSoundSourceManager()})
 			{
-				SoundSourceManager->PlayElement(ProceduralElement);
+				SoundSourceManager->PlayElement(ElementInstance);
+				UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Tick: Playing element '%s'."), *ElementInstance->GetName());
+
+				/** If the element has its intervalmode set to OnFinished, we remove the element from the array. */
+				if (ElementInstance->RuntimeData.IntervalMode == EIntervalMode::OnFinished)
+				{
+					ScheduledElementInstances.Remove(ElementInstance);
+					return;
+				}
 			}
 			
-			ScheduleProceduralElement(ProceduralElement);
+			ScheduleProceduralElement(ElementInstance);
+			UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Scheduled element '%s'."), *ElementInstance->GetName());
 		}
 	}
 }
 
-void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstance* ProceduralElement)
+void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstance* ElementInstance)
 {
-	if (!ProceduralElement || !Owner) { return; }
+	if (!ElementInstance || !Owner) { return; }
 	
 	float DensityScalar {1.0f};
 
-	if(UAmbiverseLayerAsset* Layer {ProceduralElement->AssociatedLayer}; 
-		UAmbiverseParameterManager* ParameterManager {Owner->GetParameterManager()})
+	UAmbiverseLayerAsset* Layer {ElementInstance->AssociatedLayer};
+	UAmbiverseParameterManager* ParameterManager {Owner->GetParameterManager()};
+		
+	if(Layer && ParameterManager)
 	{
 		if (TArray<FAmbiverseParameterModifiers> Modifiers {Layer->Parameters}; !Modifiers.IsEmpty())
 		{
@@ -107,19 +122,27 @@ void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstan
 		}
 	}
 	
-	ProceduralElement->SetTime(DensityScalar);
+	ElementInstance->SetTime(DensityScalar);
 }
 
 void UAmbiverseElementManager::PrimeElements(TArray<UAmbiverseElementInstance*> Elements, uint16 PrimeCount)
 {
 	if (PrimeCount > 0 && Elements.Num() > 0)
 	{
+		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("PrimeElements: Priming %d elements."), Elements.Num());
+
 		for (int i {0}; i < PrimeCount; ++i)
 		{
 			UAmbiverseElementInstance* MinElement {Elements[0]};
 
 			for (UAmbiverseElementInstance* ProceduralElement : Elements)
 			{
+				if (!ProceduralElement) 
+				{ 
+					UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("PrimeElements: Skipped a null element in the elements array."));
+					continue; 
+				}
+				
 				ScheduleProceduralElement(ProceduralElement);
 
 				if (ProceduralElement->Time < MinElement->Time)
@@ -127,16 +150,13 @@ void UAmbiverseElementManager::PrimeElements(TArray<UAmbiverseElementInstance*> 
 					MinElement = ProceduralElement;
 				}
 			}
-
-			for (UAmbiverseElementInstance* ProceduralElement : Elements)
-			{
-				if (ProceduralElement != MinElement)
-				{
-					ProceduralElement->Time -= MinElement->Time;
-				}
-			}
+			
 			ScheduleProceduralElement(MinElement);
 		}
+	}
+	else
+	{
+		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("PrimeElements: No elements to prime."));
 	}
 }
 

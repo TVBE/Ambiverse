@@ -51,6 +51,7 @@ public:
 	}
 
 	/** Adds an ambiverse layer to the subsystem if the layer is not already active. */
+	UFUNCTION(BlueprintCallable, Category = "Ambiverse", Meta = (DisplayName = "Add Layer"))
 	bool AddAmbiverseLayer(UAmbiverseLayerAsset* Asset);
 	
 	/**
@@ -60,6 +61,7 @@ public:
 	 *	@param FadeTime An optional fade time for all elements to make the deactivation less noticable.
 	 *	@return Whether the specified layer was found and removed succesfully. This will be true if some of the layer's elements are still playing.
 	 */
+	UFUNCTION(BlueprintCallable, Category = "Ambiverse", Meta = (DisplayName = "Remove Layer"))
 	bool RemoveAmbiverseLayer(UAmbiverseLayerAsset* Asset, const bool ForceStop = false, const float FadeTime = 1.0f);
 
 private:

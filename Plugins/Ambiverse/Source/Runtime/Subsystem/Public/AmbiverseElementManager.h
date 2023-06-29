@@ -17,7 +17,7 @@ class UAmbiverseElementManager : public UAmbiverseSubsystemComponent
 
 private:
 	UPROPERTY()
-	TArray<UAmbiverseElementInstance*> ScheduledProceduralElements;
+	TArray<UAmbiverseElementInstance*> ScheduledElementInstances;
 
 	UPROPERTY()
 	TArray<UAmbiverseElementInstance*> PlayingProceduralElements;
@@ -34,7 +34,7 @@ public:
 	void EvaluateFinishedElement(UAmbiverseElementInstance* Element);
 
 private:
-	void ScheduleProceduralElement(UAmbiverseElementInstance* ProceduralElement);
+	void ScheduleProceduralElement(UAmbiverseElementInstance* ElementInstance);
 
 	/** primes a group of elements. */
 	void PrimeElements(TArray<UAmbiverseElementInstance*> Elements, uint16 PrimeCount = 5);

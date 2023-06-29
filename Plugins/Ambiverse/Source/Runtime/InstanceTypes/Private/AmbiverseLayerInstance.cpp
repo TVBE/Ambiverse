@@ -11,10 +11,10 @@ bool UAmbiverseLayerInstance::Initialize(UAmbiverseSubsystem* Subsystem)
 	if (!Subsystem) { return false; }
 	AmbiverseSubsystem = Subsystem;
 	
-	Asset->Elements.RemoveAll([](const FAmbiverseElementRuntimeData& Element){ return !Element.IsValid(); });
-	
 	if (Asset->Elements.Num() > 0)
 	{
+		Asset->Elements.RemoveAll([](const FAmbiverseElementRuntimeData& Element){ return !Element.IsValid(); });
+		
 		for(const FAmbiverseElementRuntimeData& RuntimeElementData : Asset->Elements)
 		{
 			UAmbiverseElementInstance* NewRuntimeElement = NewObject<UAmbiverseElementInstance>(this, UAmbiverseElementInstance::StaticClass());
@@ -23,7 +23,7 @@ bool UAmbiverseLayerInstance::Initialize(UAmbiverseSubsystem* Subsystem)
 			
 			this->ProceduralElements.Add(NewRuntimeElement);
 		}
-
+		
 		if (UAmbiverseElementManager* ElementManager {AmbiverseSubsystem->GetElementManager()})
 		{
 			ElementManager->RegisterElements(ProceduralElements);

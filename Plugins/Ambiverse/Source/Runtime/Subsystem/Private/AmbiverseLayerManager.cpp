@@ -30,7 +30,7 @@ bool UAmbiverseLayerManager::RegisterAmbiverseLayer(UAmbiverseLayerAsset* LayerA
 		UE_LOG(LogAmbiverseLayerManager, Warning, TEXT("RegisterAmbiverseLayer: No Layer provided."));
 		return false;
 	}
-
+	
 	if (LayerAsset->Elements.IsEmpty())
 	{
 		UE_LOG(LogAmbiverseLayerManager, Warning, TEXT("RegisterAmbiverseLayer: Layer has no procedural sounds: '%s'."),
@@ -49,6 +49,7 @@ bool UAmbiverseLayerManager::RegisterAmbiverseLayer(UAmbiverseLayerAsset* LayerA
 		UE_LOG(LogAmbiverseLayerManager, Verbose, TEXT("Registered Ambiverse Layer: '%s'."), *LayerAsset->GetName());
 
 		return true;
+		
 	}
 	return false;
 }
