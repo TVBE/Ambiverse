@@ -7,8 +7,12 @@ FTransform FAmbiverseSoundDistributionData::GetSoundTransform(const FAmbiverseSo
 {
 	FTransform Transform;
 
-	const double X {FMath::RandRange(-DistributionData.HorizontalRange.X, DistributionData.HorizontalRange.X)};
-	const double Y {FMath::RandRange(-DistributionData.HorizontalRange.Y, DistributionData.HorizontalRange.Y)};
+	const double Angle {FMath::RandRange(0.0, 2.0 * PI)};
+
+	const double Radius {FMath::RandRange(DistributionData.HorizontalRange.X, DistributionData.HorizontalRange.Y)};
+
+	const double X {Radius * FMath::Cos(Angle)};
+	const double Y {Radius * FMath::Sin(Angle)};
 	
 	double Z {FMath::RandRange(DistributionData.VerticalRange * -0.5, DistributionData.VerticalRange * 0.5)};
 	Z += DistributionData.VerticalOffset;
@@ -19,3 +23,4 @@ FTransform FAmbiverseSoundDistributionData::GetSoundTransform(const FAmbiverseSo
 	
 	return Transform;
 }
+
