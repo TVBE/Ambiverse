@@ -31,16 +31,16 @@ private:
 #endif
 
 public:
-	void PlayElement(UAmbiverseElementInstance* ProceduralElement);
+	/** Initiates and plays an element. */
+	void PlayElement(UAmbiverseElementInstance* ElementInstance);
 	
-	void InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData);
-
-	UFUNCTION(BlueprintCallable)
-	void ReleaseToPool(AAmbiverseSoundSource* SoundSource);
+	void InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData, UAmbiverseElementInstance* ElementInstance);
 
 #if !UE_BUILD_SHIPPING
 	void SetSoundSourceVisualisationEnabled(const bool IsEnabled);
 #endif
 
+	void HandleSoundSourceFinishedPlayback(AAmbiverseSoundSource* SoundSource);
+	
 	FORCEINLINE TArray<AAmbiverseSoundSource*> GetActiveSoundSources() const { return ActiveSoundSources; }
 };

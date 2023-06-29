@@ -2,7 +2,7 @@
 
 #include "AmbiverseSubsystem.h"
 #include "AmbiverseDistributorAsset.h"
-#include "AmbiverseDistributorManager.h"
+#include "AmbiverseDistributionManager.h"
 #include "AmbiverseElementAsset.h"
 #include "AmbiverseElementManager.h"
 #include "AmbiverseLayerManager.h"
@@ -32,7 +32,7 @@ void UAmbiverseSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	SoundSourceManager = NewObject<UAmbiverseSoundSourceManager>(this);
 	if (SoundSourceManager) { SoundSourceManager->Initialize(this); }
 
-	DistributorManager = NewObject<UAmbiverseDistributorManager>(this);
+	DistributorManager = NewObject<UAmbiverseDistributionManager>(this);
 	if (DistributorManager) { DistributorManager->Initialize(this); }
 
 	ElementManager = NewObject<UAmbiverseElementManager>(this);

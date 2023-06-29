@@ -31,7 +31,7 @@ public:
 private:
 	UPROPERTY(Transient)
 	UAmbiverseSubsystem* AmbiverseSubsystem;
-
+	
 	bool IsInitialized {false};
 	
 	float TimeActive {0.0f};
@@ -39,7 +39,5 @@ private:
 public:
 	bool Initialize(UAmbiverseSubsystem* Subsystem);
 	
-	void Update(float DeltaTime);
-
 	static UAmbiverseLayerInstance* CreateInstanceFromAsset(UObject* Outer, UAmbiverseLayerAsset* Asset);
 };

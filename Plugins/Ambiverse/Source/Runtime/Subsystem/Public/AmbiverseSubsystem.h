@@ -9,7 +9,7 @@
 class UAmbiverseElementManager;
 class UAmbiverseElementInstance;
 class UAmbiverseVisualisationComponent;
-class UAmbiverseDistributorManager;
+class UAmbiverseDistributionManager;
 class UAmbiverseLayerManager;
 class UAmbiverseParameterManager;
 class UAmbiverseSoundSourceManager;
@@ -33,7 +33,7 @@ private:
 	UAmbiverseSoundSourceManager* SoundSourceManager {nullptr};
 
 	UPROPERTY()
-	UAmbiverseDistributorManager* DistributorManager {nullptr};
+	UAmbiverseDistributionManager* DistributorManager {nullptr};
 
 	UPROPERTY()
 	UAmbiverseElementManager* ElementManager {nullptr};
@@ -73,7 +73,7 @@ public:
 	FORCEINLINE UAmbiverseLayerManager* GetLayerManager() const { return LayerManager; }
 	FORCEINLINE UAmbiverseParameterManager* GetParameterManager() const { return ParameterManager; }
 	FORCEINLINE UAmbiverseSoundSourceManager* GetSoundSourceManager() const { return SoundSourceManager; }
-	FORCEINLINE UAmbiverseDistributorManager* GetDistributorManager() const { return DistributorManager; }
+	FORCEINLINE UAmbiverseDistributionManager* GetDistributorManager() const { return DistributorManager; }
 	FORCEINLINE UAmbiverseElementManager* GetElementManager() const { return ElementManager; }
 };
 

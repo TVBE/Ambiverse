@@ -1,9 +1,7 @@
 // Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #include "AmbiverseElementManager.h"
-#include "AmbiverseDistributorAsset.h"
 #include "AmbiverseSoundSourceManager.h"
-#include "AmbiverseDistributorManager.h"
 #include "AmbiverseParameterManager.h"
 #include "AmbiverseElementInstance.h"
 #include "AmbiverseSubsystem.h"
@@ -16,6 +14,11 @@ void UAmbiverseElementManager::RegisterElements(TArray<UAmbiverseElementInstance
 	
 	PrimeElements(Elements);
 	ScheduledProceduralElements.Append(Elements);
+
+	for (const UAmbiverseElementInstance* Element : Elements)
+	{
+		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Registered and scheduled element: '%s'"), *Element->GetName());
+	}
 }
 
 void UAmbiverseElementManager::UnregisterElements(TArray<UAmbiverseElementInstance*> Elements)
@@ -36,6 +39,29 @@ void UAmbiverseElementManager::UnregisterElements(TArray<UAmbiverseElementInstan
 	}
 }
 
+void UAmbiverseElementManager::EvaluateFinishedElement(UAmbiverseElementInstance* Element)
+{
+	if (!Element) { return; }
+
+	/** If the element was marked pending kill while being associated with an sound source, we destroy the element at this moment. */
+	if (Element->IsPendingKill)
+	{
+		Element->ConditionalBeginDestroy();
+		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("EvaluateFinishedElement: Destroyed element due to being marked PendingKill: '%s'"), *Element->GetName());
+	}
+
+	if (Element->RuntimeData.IntervalMode == EIntervalMode::OnSpawn && ScheduledProceduralElements.Contains(Element))
+	{
+		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("EvaluateFinishedElement: Element is already scheduled: '%s'"), *Element->GetName());
+		return;
+	}
+	if (Element->RuntimeData.IntervalMode == EIntervalMode::OnFinished)
+	{
+		ScheduleProceduralElement(Element);
+		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("EvaluateFinishedElement: Rescheduled element: '%s'"), *Element->GetName());
+	}
+}
+
 void UAmbiverseElementManager::Tick(const float DeltaTime)
 {
 	if (ScheduledProceduralElements.IsEmpty()) { return; }
@@ -49,7 +75,13 @@ void UAmbiverseElementManager::Tick(const float DeltaTime)
 
 		if (ProceduralElement->Time <= 0)
 		{
-			PlayProceduralElement(ProceduralElement);
+			if (!Owner || !ProceduralElement) { return; }
+			
+			if (UAmbiverseSoundSourceManager* SoundSourceManager {Owner->GetSoundSourceManager()})
+			{
+				SoundSourceManager->PlayElement(ProceduralElement);
+			}
+			
 			ScheduleProceduralElement(ProceduralElement);
 		}
 	}
@@ -61,7 +93,7 @@ void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstan
 	
 	float DensityScalar {1.0f};
 
-	if(UAmbiverseLayerAsset* Layer {ProceduralElement->OwningLayer}; 
+	if(UAmbiverseLayerAsset* Layer {ProceduralElement->AssociatedLayer}; 
 		UAmbiverseParameterManager* ParameterManager {Owner->GetParameterManager()})
 	{
 		if (TArray<FAmbiverseParameterModifiers> Modifiers {Layer->Parameters}; !Modifiers.IsEmpty())
@@ -108,78 +140,3 @@ void UAmbiverseElementManager::PrimeElements(TArray<UAmbiverseElementInstance*> 
 	}
 }
 
-void UAmbiverseElementManager::PlayProceduralElement(UAmbiverseElementInstance* ProceduralElement)
-{
-	if (!Owner)
-	{
-		UE_LOG(LogAmbiverseElementManager, Warning, TEXT("PlayProceduralElement: Owner  is invalid."))
-		return;
-	}
-	
-	if (!ProceduralElement)
-	{
-		UE_LOG(LogAmbiverseElementManager, Warning, TEXT("PlayProceduralElement: ProceduralElement is invalid."))
-		return;
-	}
-	
-	FVector CameraLocation;
-	bool IsCameraValid {false};
-
-	if (APlayerController* PlayerController {GetWorld()->GetFirstPlayerController()})
-	{
-		if (const APlayerCameraManager* CameraManager{PlayerController->PlayerCameraManager})
-		{
-			CameraLocation = CameraManager->GetCameraLocation();
-			IsCameraValid = true;
-		}
-	}
-
-	if (!IsCameraValid)
-	{
-		UE_LOG(LogAmbiverseElementManager, Error, TEXT("ProcessProceduralElement: Unable to obtain valid camera location."));
-		return;
-	}
-
-	/** Prepare the sound source data. */
-	FAmbiverseSoundSourceData SoundSourceData{FAmbiverseSoundSourceData()};
-
-	UAmbiverseElementAsset* Element {ProceduralElement->RuntimeData.Element};
-
-	if (!Element) { return; }
-
-	SoundSourceData.Sound = Element->GetSound();
-	SoundSourceData.Name = FName(Element->GetName());
-	
-	if (const TSubclassOf<UAmbiverseDistributorAsset> DistributorClass{Element->GetDistributorClass()})
-	{
-		UAmbiverseDistributorManager* DistributorManager {Owner->GetDistributorManager()};
-		if (!DistributorManager)
-		{
-			UE_LOG(LogAmbiverseElementManager, Error, TEXT("ProcessProceduralElement: DistributorManager is nullptr."));
-			return;
-		}
-
-		if (UAmbiverseDistributorAsset* Distributor {DistributorManager->GetDistributorByClass(DistributorClass)})
-		{
-			FTransform Transform{};
-			if (Distributor->ExecuteDistribution(this, Transform, CameraLocation, Element))
-			{
-				SoundSourceData.Transform = Transform;
-			}
-		}
-	}
-	else
-	{
-		SoundSourceData.Transform = FAmbiverseSoundDistributionData::GetSoundTransform(
-			Element->GetDistributionData(), CameraLocation);
-	}
-
-	UAmbiverseSoundSourceManager* SoundSourceManager {Owner->GetSoundSourceManager()};
-	if (!SoundSourceManager)
-	{
-		UE_LOG(LogAmbiverseElementManager, Error, TEXT("ProcessProceduralElement: SoundSourceManager is nullptr."));
-		return;
-	}
-
-	SoundSourceManager->InitiateSoundSource(SoundSourceData);
-}

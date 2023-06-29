@@ -1,12 +1,47 @@
 // Copyright (c) 2023-present Tim Verberne. All rights reserved.
 
 #include "AmbiverseSoundSourceManager.h"
+
+#include "AmbiverseDistributorAsset.h"
+#include "AmbiverseDistributionManager.h"
+#include "AmbiverseElementAsset.h"
+#include "AmbiverseElementInstance.h"
+#include "AmbiverseElementManager.h"
 #include "AmbiverseSoundSource.h"
 #include "AmbiverseSubsystem.h"
 
 DEFINE_LOG_CATEGORY_CLASS(UAmbiverseSoundSourceManager, LogAmbiverseSoundSourceManager);
 
-void UAmbiverseSoundSourceManager::InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData)
+void UAmbiverseSoundSourceManager::PlayElement(UAmbiverseElementInstance* ElementInstance)
+{
+	FAmbiverseSoundSourceData SoundSourceData{FAmbiverseSoundSourceData()};
+
+	UAmbiverseElementAsset* Element {ElementInstance->RuntimeData.Element};
+
+	if (!Element) { return; }
+
+	SoundSourceData.Sound = Element->GetSound();
+	SoundSourceData.Name = FName(Element->GetName());
+
+	if(UAmbiverseDistributionManager* DistributionManager {Owner->GetDistributorManager()})
+	{
+		FTransform Transform {};
+		if (DistributionManager->GetTransformForElement(Transform, ElementInstance))
+		{
+			SoundSourceData.Transform = Transform;
+			
+			ElementInstance->LastPlaylocation = Transform.GetLocation();
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	InitiateSoundSource(SoundSourceData, ElementInstance);
+}
+
+void UAmbiverseSoundSourceManager::InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData, UAmbiverseElementInstance* ElementInstance)
 {
 	if (!SoundSourceData.Sound)
 	{
@@ -36,17 +71,33 @@ void UAmbiverseSoundSourceManager::InitiateSoundSource(FAmbiverseSoundSourceData
 	}
 	if (SoundSourceInstance)
 	{
-		SoundSourceInstance->Initialize(this, SoundSourceData);
-		ActiveSoundSources.AddUnique(SoundSourceInstance);
+		if(SoundSourceInstance->Initialize(SoundSourceData, ElementInstance))
+		{
+			SoundSourceInstance->OnFinishedPlayback.BindUObject(this, &UAmbiverseSoundSourceManager::HandleSoundSourceFinishedPlayback);
+			ActiveSoundSources.AddUnique(SoundSourceInstance);
+		}
 	}
 }
 
-void UAmbiverseSoundSourceManager::ReleaseToPool(AAmbiverseSoundSource* SoundSource)
+void UAmbiverseSoundSourceManager::HandleSoundSourceFinishedPlayback(AAmbiverseSoundSource* SoundSource)
 {
 	if (!SoundSource) { return; }
 
-	ActiveSoundSources.Remove(SoundSource);
+	/** We retrieve the associated element from the SoundSource before deinitializing the SoundSource and adding it back to the available pool.
+	 *	We pass it to the ElementManager so that it can reschedule the element if it is set to only be rescheduled after finishing playback. */
+	if (UAmbiverseElementInstance* ElementInstance {SoundSource->GetAssociatedElement()})
+	{
+		/** We set the element's LastPlaylocation here. */ //TODO: This is probably not the best place to do this.
+		ElementInstance->LastPlaylocation = SoundSource->GetActorLocation();
+		if (UAmbiverseElementManager* ElementManager {Owner->GetElementManager()})
+		{
+			ElementManager->EvaluateFinishedElement(ElementInstance);
+		}
+	}
 	
+	SoundSource->Deinitialize();
+	
+	ActiveSoundSources.Remove(SoundSource);
 	Pool.AddUnique(SoundSource);
 }
 

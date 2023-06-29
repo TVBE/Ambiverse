@@ -13,11 +13,11 @@ struct FAmbiverseSoundSourceData
 {
 	GENERATED_USTRUCT_BODY()
 	
-	/** The MetaSoundSource to use for an AmbienceSoundSource. */
+	/** The MetaSoundSource to use for a SoundSource. */
 	UPROPERTY()
 	UMetaSoundSource* Sound {nullptr};
 	
-	/** The transform to play an AmbienceSoundSource at. */
+	/** The transform to play a SoundSource at. */
 	UPROPERTY()
 	FTransform Transform {FTransform()};
 

@@ -28,9 +28,12 @@ public:
 	void RegisterElements(TArray<UAmbiverseElementInstance*> Elements);
 	void UnregisterElements(TArray<UAmbiverseElementInstance*> Elements);
 
-private:
-	void PlayProceduralElement(UAmbiverseElementInstance* ProceduralElement);
+	/** Determines if a finished element should be rescheduled if it is still valid and not already scheduled.
+	 *	Situations where this might not be the case is if the element is marked PendingKill, or its IntervalMode is set to OnSpawn.
+	 *	This is basically a handover function that is exclusively called by the SoundSourceManager within the owner subsystem. */
+	void EvaluateFinishedElement(UAmbiverseElementInstance* Element);
 
+private:
 	void ScheduleProceduralElement(UAmbiverseElementInstance* ProceduralElement);
 
 	/** primes a group of elements. */
