@@ -36,11 +36,20 @@ public:
 	
 	void InitiateSoundSource(FAmbiverseSoundSourceData& SoundSourceData, UAmbiverseElementInstance* ElementInstance);
 
+	void HandleSoundSourceFinishedPlayback(AAmbiverseSoundSource* SoundSource);
+
 #if !UE_BUILD_SHIPPING
 	void SetSoundSourceVisualisationEnabled(const bool IsEnabled);
 #endif
 
-	void HandleSoundSourceFinishedPlayback(AAmbiverseSoundSource* SoundSource);
-	
+	private:
+	/**
+	 * Gets a AAmbiverseSoundSource instance of the specified class from the pool.
+	 * @param Class The class of AmbiverseSoundSource to get.
+	 * @return An instance of the specified class.
+	 */
+	AAmbiverseSoundSource* GetSoundSourceFromPool(TSubclassOf<AAmbiverseSoundSource> Class);
+
+public:
 	FORCEINLINE TArray<AAmbiverseSoundSource*> GetActiveSoundSources() const { return ActiveSoundSources; }
 };

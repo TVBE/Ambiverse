@@ -18,13 +18,18 @@ class AMBIVERSE_API UAmbiverseDistributorAsset : public UObject
 
 private:
 	UPROPERTY(Transient)
+	UWorld* World;
+	
+	UPROPERTY(Transient)
 	AActor* Listener;
 
 public:
-	void Activate(UObject* WorldContextObject);
+	void Initialize(UObject* WorldContextObject);
+	
+	virtual UWorld* GetWorld() const override { return World; };
 	
 	UFUNCTION(BlueprintImplementableEvent, Meta = (WorldContext = "WorldContextObject"))
-	bool ExecuteDistribution(UObject* WorldContextObject, FTransform& Transform, FVector Location, UAmbiverseElementAsset* Element);
+	bool ExecuteDistribution(FTransform& Transform, FVector Location, UAmbiverseElementAsset* Element);
 
 	/** Gets a random point in a specified radius around the listener. */
 	UFUNCTION(BlueprintCallable)
@@ -53,3 +58,4 @@ protected:
 private:
 	UWorld* GetWorldFromListener();
 };
+

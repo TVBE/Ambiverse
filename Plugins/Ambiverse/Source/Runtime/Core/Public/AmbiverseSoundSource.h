@@ -54,7 +54,7 @@ public:
 	/** Deinitializes the sound source and clears all data associated with the element the SoundSource was playing before.
 	 *	This prevents lingering references to elements that might or might not exist anymore while this SoundSource is in the pool. */
 	bool Deinitialize();
-
+	
 	virtual void Tick(float DeltaTime) override;
 
 	void SetSound(USoundBase* NewSound)
@@ -67,10 +67,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void EventOnPlay();
+	void BeginPlayback();
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	void EventOnFinishedPlaying();
+	void EndPlayback();
 	
 	UFUNCTION(BlueprintGetter)
 	FORCEINLINE UAudioComponent* GetAudioComponent() const { return AudioComponent; }

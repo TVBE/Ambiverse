@@ -34,10 +34,7 @@ public:
 	void EvaluateFinishedElement(UAmbiverseElementInstance* Element);
 
 private:
-	void ScheduleProceduralElement(UAmbiverseElementInstance* ElementInstance);
-
-	/** primes a group of elements. */
-	void PrimeElements(TArray<UAmbiverseElementInstance*> Elements, uint16 PrimeCount = 5);
+	void ScheduleProceduralElement(UAmbiverseElementInstance* ElementInstance, const bool IgnoreMin = false);
 };
 
 

@@ -12,14 +12,11 @@ void UAmbiverseElementManager::RegisterElements(TArray<UAmbiverseElementInstance
 {
 	if (Elements.IsEmpty()) { return; }
 	
-	PrimeElements(Elements);
-	
-	ScheduledElementInstances.Append(Elements);
-
-	for (const UAmbiverseElementInstance* Element : Elements)
+	for (UAmbiverseElementInstance* Element : Elements)
 	{
 		if (Element)
 		{
+			ScheduleProceduralElement(Element, true);
 			UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Registered and scheduled element: '%s'"), *Element->GetName());
 		}
 	}
@@ -45,7 +42,11 @@ void UAmbiverseElementManager::UnregisterElements(TArray<UAmbiverseElementInstan
 
 void UAmbiverseElementManager::EvaluateFinishedElement(UAmbiverseElementInstance* Element)
 {
-	if (!Element) { return; }
+	if (!Element)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Element is null"))
+		return;
+	}
 
 	/** If the element was marked pending kill while being associated with an sound source, we destroy the element at this moment. */
 	if (Element->IsPendingKill)
@@ -94,13 +95,13 @@ void UAmbiverseElementManager::Tick(const float DeltaTime)
 				}
 			}
 			
-			ScheduleProceduralElement(ElementInstance);
+			ScheduleProceduralElement(ElementInstance); // THIS IS THE CULPRIT
 			UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("Scheduled element '%s'."), *ElementInstance->GetName());
 		}
 	}
 }
 
-void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstance* ElementInstance)
+void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstance* ElementInstance, const bool IgnoreMin)
 {
 	if (!ElementInstance || !Owner) { return; }
 	
@@ -121,42 +122,13 @@ void UAmbiverseElementManager::ScheduleProceduralElement(UAmbiverseElementInstan
 			}
 		}
 	}
+	const double MinimumValue {IgnoreMin ? 0 : ElementInstance->RuntimeData.IntervalRange.X};
 	
-	ElementInstance->SetTime(DensityScalar);
+	ElementInstance->ReferenceTime = FMath::RandRange(MinimumValue,ElementInstance->RuntimeData.IntervalRange.Y);
+	ElementInstance->Time = ElementInstance->ReferenceTime * DensityScalar;
+
+	if (ScheduledElementInstances.Contains(ElementInstance)) { return; }
+	ScheduledElementInstances.Add(ElementInstance);
 }
 
-void UAmbiverseElementManager::PrimeElements(TArray<UAmbiverseElementInstance*> Elements, uint16 PrimeCount)
-{
-	if (PrimeCount > 0 && Elements.Num() > 0)
-	{
-		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("PrimeElements: Priming %d elements."), Elements.Num());
-
-		for (int i {0}; i < PrimeCount; ++i)
-		{
-			UAmbiverseElementInstance* MinElement {Elements[0]};
-
-			for (UAmbiverseElementInstance* ProceduralElement : Elements)
-			{
-				if (!ProceduralElement) 
-				{ 
-					UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("PrimeElements: Skipped a null element in the elements array."));
-					continue; 
-				}
-				
-				ScheduleProceduralElement(ProceduralElement);
-
-				if (ProceduralElement->Time < MinElement->Time)
-				{
-					MinElement = ProceduralElement;
-				}
-			}
-			
-			ScheduleProceduralElement(MinElement);
-		}
-	}
-	else
-	{
-		UE_LOG(LogAmbiverseElementManager, VeryVerbose, TEXT("PrimeElements: No elements to prime."));
-	}
-}
 

@@ -4,10 +4,12 @@
 
 DEFINE_LOG_CATEGORY_CLASS(UAmbiverseDistributorAsset, LogAmbiverseDistributor);
 
-void UAmbiverseDistributorAsset::Activate(UObject* WorldContextObject)
+void UAmbiverseDistributorAsset::Initialize(UObject* WorldContextObject)
 {
 	if (WorldContextObject)
 	{
+		World = WorldContextObject->GetWorld();
+		
 		if (APlayerController* PlayerController {WorldContextObject->GetWorld()->GetFirstPlayerController()})
 		{
 			if (APlayerCameraManager* CameraManager {PlayerController->PlayerCameraManager})
@@ -53,37 +55,38 @@ FVector UAmbiverseDistributorAsset::GetPointAtDistanceAndAngleFromListener(float
 
 void UAmbiverseDistributorAsset::SnapToFloor(FVector& Location, float Offset)
 {
-	if (UWorld* World {GetWorldFromListener()})
+	if (!World)
 	{
-		const FVector StartLocation {Listener->GetActorLocation()};
-		const FVector EndLocation {StartLocation + FVector{0.0f, 0.0f, -FLT_MAX}};
+		return;
+	}
+	
+	const FVector StartLocation {Listener->GetActorLocation()};
+	const FVector EndLocation {StartLocation + FVector{0.0f, 0.0f, -FLT_MAX}};
 
-		FHitResult HitResult;
-		FCollisionQueryParams TraceParams(FName(TEXT("SnapToFloorTrace")), true, Listener);
-		TraceParams.bTraceComplex = false;
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(FName(TEXT("SnapToFloorTrace")), true, Listener);
+	TraceParams.bTraceComplex = false;
 
-		const bool Hit {World->LineTraceSingleByChannel(
-			HitResult,
-			StartLocation,
-			EndLocation,
-			ECC_Visibility,
-			TraceParams
-		)};
+	const bool Hit {World->LineTraceSingleByChannel(
+	HitResult,
+	StartLocation,
+	EndLocation,
+	ECC_Visibility,
+	TraceParams
+	)};
 
-		if (Hit)
-		{
-			Location = HitResult.Location + FVector(0, 0, Offset);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("SnapToFloor: Failed to snap to floor."));
-		}
+	if (Hit)
+	{
+		Location = HitResult.Location + FVector(0, 0, Offset);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SnapToFloor: Failed to snap to floor."));
 	}
 }
 
 void UAmbiverseDistributorAsset::SetLocationByTrace(FVector& Location, float Offset)
 {
-	UWorld* World = GetWorldFromListener();
 	if (!World)
 	{
 		return;

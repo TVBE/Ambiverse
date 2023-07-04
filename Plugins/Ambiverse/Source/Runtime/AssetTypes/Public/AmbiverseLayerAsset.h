@@ -37,7 +37,7 @@ public:
 #endif
 	
 	/** the procedural sound data of this layer. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Elements", Meta = (DisplayName = "Elements", TitleProperty = "Element"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Elements", Meta = (DisplayName = "Elements", TitleProperty = "ElementAsset"))
 	TArray<FAmbiverseElementRuntimeData> Elements;
 	
 	/** Parameters that influence all procedural sounds in this layer. */

@@ -16,7 +16,7 @@ void UAmbiverseSoundSourceManager::PlayElement(UAmbiverseElementInstance* Elemen
 {
 	FAmbiverseSoundSourceData SoundSourceData{FAmbiverseSoundSourceData()};
 
-	UAmbiverseElementAsset* Element {ElementInstance->RuntimeData.Element};
+	UAmbiverseElementAsset* Element {ElementInstance->RuntimeData.ElementAsset};
 
 	if (!Element) { return; }
 
@@ -48,27 +48,9 @@ void UAmbiverseSoundSourceManager::InitiateSoundSource(FAmbiverseSoundSourceData
 		UE_LOG(LogAmbiverseSoundSourceManager, Warning, TEXT("InitiateSoundSource: SoundSourceData contains no valid sound."))
 		return;
 	}
-	AAmbiverseSoundSource* SoundSourceInstance {nullptr};
 	
-	if (Pool.Num() == 0)
-	{
-		SoundSourceInstance = Owner->GetWorld()->SpawnActor<AAmbiverseSoundSource>(AAmbiverseSoundSource::StaticClass());
-		UE_LOG(LogAmbiverseSoundSourceManager, Verbose, TEXT("InitiateSoundSource: Created new SoundSource instance."))
-	}
-	else
-	{
-		for (AAmbiverseSoundSource* SoundSource : Pool)
-		{
-			SoundSourceInstance = SoundSource;
-			break;
-		}
-		
-		if (!SoundSourceInstance)
-		{
-			SoundSourceInstance = Owner->GetWorld()->SpawnActor<AAmbiverseSoundSource>(AAmbiverseSoundSource::StaticClass());
-			UE_LOG(LogAmbiverseSoundSourceManager, Verbose, TEXT("InitiateSoundSource: Created new SoundSource instance."))
-		}
-	}
+	AAmbiverseSoundSource* SoundSourceInstance {GetSoundSourceFromPool(ElementInstance->RuntimeData.ElementAsset->GetSoundSourceClass())};
+	
 	if (SoundSourceInstance)
 	{
 		if(SoundSourceInstance->Initialize(SoundSourceData, ElementInstance))
@@ -87,7 +69,7 @@ void UAmbiverseSoundSourceManager::HandleSoundSourceFinishedPlayback(AAmbiverseS
 	 *	We pass it to the ElementManager so that it can reschedule the element if it is set to only be rescheduled after finishing playback. */
 	if (UAmbiverseElementInstance* ElementInstance {SoundSource->GetAssociatedElement()})
 	{
-		/** We set the element's LastPlaylocation here. */ //TODO: This is probably not the best place to do this.
+		/** We set the element's LastPlaylocation here. */ //TODO: Move this to a more suitable location.
 		ElementInstance->LastPlaylocation = SoundSource->GetActorLocation();
 		if (UAmbiverseElementManager* ElementManager {Owner->GetElementManager()})
 		{
@@ -99,6 +81,23 @@ void UAmbiverseSoundSourceManager::HandleSoundSourceFinishedPlayback(AAmbiverseS
 	
 	ActiveSoundSources.Remove(SoundSource);
 	Pool.AddUnique(SoundSource);
+}
+
+AAmbiverseSoundSource* UAmbiverseSoundSourceManager::GetSoundSourceFromPool(TSubclassOf<AAmbiverseSoundSource> Class)
+{
+	for (int32 i {0}; i < Pool.Num(); i++)
+	{
+		AAmbiverseSoundSource* SoundSource {Pool[i]};
+		if (SoundSource && SoundSource->GetClass() == Class)
+		{
+			Pool.RemoveAt(i);
+			return SoundSource;
+		}
+	}
+
+	/** If we cannot find a SoundSource of the correct class, we create a new instance and hand it over immediatly. */
+	AAmbiverseSoundSource* SoundSource {Owner->GetWorld()->SpawnActor<AAmbiverseSoundSource>(Class)};
+	return SoundSource;
 }
 
 #if !UE_BUILD_SHIPPING

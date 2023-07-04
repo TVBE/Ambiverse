@@ -38,7 +38,7 @@ bool AAmbiverseSoundSource::Initialize(FAmbiverseSoundSourceData& Data, UAmbiver
 	if(AudioComponent)
 	{
 		AudioComponent->Play();
-		EventOnPlay();
+		BeginPlayback();
 	}
 	else
 	{
@@ -77,15 +77,12 @@ void AAmbiverseSoundSource::BeginPlay()
 
 void AAmbiverseSoundSource::HandleOnAudioFinishedPlaying()
 {
-	if (SoundSourceManager)
-	{
 #if !UE_BUILD_SHIPPING
 		ActiveTime = 0;
 #endif
-
-		EventOnFinishedPlaying();
+	
+		EndPlayback();
 		OnFinishedPlayback.Execute(this);
-	}
 }
 
 

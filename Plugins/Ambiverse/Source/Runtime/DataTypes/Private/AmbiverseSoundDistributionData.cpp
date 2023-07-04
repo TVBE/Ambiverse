@@ -23,4 +23,3 @@ FTransform FAmbiverseSoundDistributionData::GetSoundTransform(const FAmbiverseSo
 	
 	return Transform;
 }
-

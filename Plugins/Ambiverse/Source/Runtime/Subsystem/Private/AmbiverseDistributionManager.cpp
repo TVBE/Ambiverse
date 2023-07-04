@@ -31,11 +31,11 @@ bool UAmbiverseDistributionManager::GetTransformForElement(FTransform& Transform
 	}
 
 	/** We first check if the element implements a custom distributor object. */
-	if (const TSubclassOf<UAmbiverseDistributorAsset> DistributorClass {ElementInstance->RuntimeData.Element->GetDistributorClass()})
+	if (const TSubclassOf<UAmbiverseDistributorAsset> DistributorClass {ElementInstance->RuntimeData.ElementAsset->GetDistributorClass()})
 	{
 		if (UAmbiverseDistributorAsset* Distributor {GetDistributorByClass(DistributorClass)})
 		{
-			if (Distributor->ExecuteDistribution(this, Transform, CameraLocation, ElementInstance->RuntimeData.Element))
+			if (Distributor->ExecuteDistribution(Transform, CameraLocation, ElementInstance->RuntimeData.ElementAsset))
 			{
 				return true;
 			}
@@ -43,14 +43,14 @@ bool UAmbiverseDistributionManager::GetTransformForElement(FTransform& Transform
 	}
 	else
 	{
-		const FAmbiverseSoundDistributionData& SoundDistributionData {ElementInstance->RuntimeData.Element->GetDistributionData()};
+		const FAmbiverseSoundDistributionData& SoundDistributionData {ElementInstance->RuntimeData.ElementAsset->GetDistributionData()};
 
 		switch (SoundDistributionData.DistributionMode)
 		{
 		case EDistributionMode::Random:
 			
 			Transform = FAmbiverseSoundDistributionData::GetSoundTransform(
-			ElementInstance->RuntimeData.Element->GetDistributionData(), CameraLocation);
+			ElementInstance->RuntimeData.ElementAsset->GetDistributionData(), CameraLocation);
 			return true;
 		
 		case EDistributionMode::Uniform:
@@ -67,7 +67,7 @@ bool UAmbiverseDistributionManager::GetTransformForElement(FTransform& Transform
 				if (Distance >= SoundDistributionData.Threshold)
 				{
 					Transform = FAmbiverseSoundDistributionData::GetSoundTransform(
-					ElementInstance->RuntimeData.Element->GetDistributionData(), CameraLocation);
+					ElementInstance->RuntimeData.ElementAsset->GetDistributionData(), CameraLocation);
 				}
 				else
 				{
@@ -83,7 +83,7 @@ bool UAmbiverseDistributionManager::GetTransformForElement(FTransform& Transform
 			else
 			{
 				Transform = FAmbiverseSoundDistributionData::GetSoundTransform(
-				ElementInstance->RuntimeData.Element->GetDistributionData(), CameraLocation);
+				ElementInstance->RuntimeData.ElementAsset->GetDistributionData(), CameraLocation);
 			}
 			return true;;
 		}
@@ -105,12 +105,14 @@ UAmbiverseDistributorAsset* UAmbiverseDistributionManager::GetDistributorByClass
 	}
 
 	/** If no instance of the specified distributor class was found, we instance a new one and return it. */
-	UAmbiverseDistributorAsset* Distributor = NewObject<UAmbiverseDistributorAsset>(this, Class.Get());
+	UAmbiverseDistributorAsset* Distributor {NewObject<UAmbiverseDistributorAsset>(this, Class.Get())};
+	
+	// YourObject = NewObject<UYourObject>(OuterObject, YourObjectClass, NAME_None, RF_Transient, nullptr, WorldContextObject);
 	UE_LOG(LogAmbiverseDistributionManager, Verbose, TEXT("GetDistributorByClass: Created new distributor of class: %s"), *Class->GetName());
 
 	if (Distributor)
 	{
-		Distributor->Activate(Owner);
+		Distributor->Initialize(Owner);
 	}
 	
 	return Distributor;

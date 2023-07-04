@@ -25,7 +25,6 @@ struct FAmbiverseSoundSourceData
 	UPROPERTY()
 	FName Name {FName("None")};
 	
-	/** Constructor with default values. */
 	FAmbiverseSoundSourceData()
 	{
 	}

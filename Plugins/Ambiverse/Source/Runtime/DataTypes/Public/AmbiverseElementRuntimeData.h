@@ -20,8 +20,8 @@ struct FAmbiverseElementRuntimeData
 {
 	GENERATED_USTRUCT_BODY()
 	
-	UPROPERTY(EditAnywhere)
-	UAmbiverseElementAsset* Element {nullptr};
+	UPROPERTY(EditAnywhere, Meta = (DisplayName = "Element"))
+	UAmbiverseElementAsset* ElementAsset {nullptr};
 
 	/** The volume of this element. */
 	UPROPERTY(EditAnywhere, Meta = (ClampMin = "0", ClampMax = "2", UIMin = "0", UIMax = "2"))
@@ -37,7 +37,7 @@ struct FAmbiverseElementRuntimeData
 
 	bool IsValid() const
 	{
-		return (Element != nullptr);
+		return (ElementAsset != nullptr);
 	}
 };
 

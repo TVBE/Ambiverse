@@ -45,8 +45,6 @@ public:
 		AssociatedLayer = Layer;
 	}
 	
-	void SetTime(const float DensityMultiplier = 1.0f);
-
 	static UAmbiverseElementInstance* CreateInstanceFromRuntimeData(UObject* Outer, FAmbiverseElementRuntimeData& RuntimeData);
 	
 };
