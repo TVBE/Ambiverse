@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AmbiverseSubsystem.h"
 #include "UObject/NoExportTypes.h"
 #include "AmbiverseSubsystemComponent.generated.h"
 
@@ -23,8 +24,14 @@ protected:
 public:
 	virtual void Initialize(UAmbiverseSubsystem* Subsystem);
 	virtual void Deinitialize(UAmbiverseSubsystem* Subsystem);
-
+	
 	virtual void Tick(const float DeltaTime) {};
+
+	virtual UWorld* GetWorld() const override
+	{
+		if (Owner) { return Owner->GetWorld(); }
+		return nullptr;
+	}
 	
 	FORCEINLINE UAmbiverseSubsystem* GetOwner() const { return Owner; }
 };

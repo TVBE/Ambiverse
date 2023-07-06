@@ -14,7 +14,8 @@ public class Ambiverse : ModuleRules
 				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/Core/Public",
 				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/DataTypes/Public",
 				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/InstanceTypes/Public",
-				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/Subsystem/Public"
+				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/Subsystem/Public",
+				"$(ProjectDir)/Plugins/Ambiverse/Source/Runtime/Libraries/Public"
 			}
 		);
 				

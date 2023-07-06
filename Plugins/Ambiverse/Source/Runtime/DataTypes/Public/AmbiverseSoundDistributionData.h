@@ -56,6 +56,4 @@ struct FAmbiverseSoundDistributionData
 	/** Defines the vertical range in which a sound source can play in relation to the player. Is not affected by ExclusionRadius. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Vertical Distribution")
 	float VerticalRange {100.0f};
-	
-	static FTransform GetSoundTransform(const FAmbiverseSoundDistributionData& DistributionData, const FVector& ListenerLocation);
 };

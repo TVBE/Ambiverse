@@ -27,8 +27,19 @@ public:
 	
 	/** Searches for a distributor instance in the registry. Will instance one if no instance was found. */
 	UAmbiverseDistributorAsset* GetDistributorByClass(TSubclassOf<UAmbiverseDistributorAsset> Class);
+
+private:
+	static bool PerformRandomDistribution(FTransform& OutTransform, const FTransform& ListenerTransform,
+		UAmbiverseElementInstance* ElementInstance);
 	
-	FORCEINLINE TArray<UAmbiverseDistributorAsset*> GetDistributorRegistry() const { return Distributors; }
+	static bool PerformUniformDistribution(FTransform& OutTransform, const FTransform& ListenerTransform,
+		UAmbiverseElementInstance* ElementInstance, const TArray<FVector>& Vectors, const bool IgnoreZ);
+	
+	static bool PerformStaticDistribution(FTransform& OutTransform, const FTransform& ListenerTransform,
+		UAmbiverseElementInstance* ElementInstance);
+
+public:
+	FORCEINLINE TArray<UAmbiverseDistributorAsset*> GetDistributors() const { return Distributors; }
 };
 
 

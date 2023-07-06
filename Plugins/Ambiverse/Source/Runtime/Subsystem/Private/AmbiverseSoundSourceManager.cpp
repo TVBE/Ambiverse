@@ -96,8 +96,12 @@ AAmbiverseSoundSource* UAmbiverseSoundSourceManager::GetSoundSourceFromPool(TSub
 	}
 
 	/** If we cannot find a SoundSource of the correct class, we create a new instance and hand it over immediatly. */
-	AAmbiverseSoundSource* SoundSource {Owner->GetWorld()->SpawnActor<AAmbiverseSoundSource>(Class)};
-	return SoundSource;
+	if (UWorld* World {GetWorld()})
+	{
+		AAmbiverseSoundSource* SoundSource {World->SpawnActor<AAmbiverseSoundSource>(Class)};
+		return SoundSource;
+	}
+	return nullptr;
 }
 
 #if !UE_BUILD_SHIPPING
