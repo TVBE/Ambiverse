@@ -163,7 +163,15 @@ bool UAmbiverseDistributionManager::PerformUniformDistribution(FTransform& OutTr
 	float Z {static_cast<float>(FMath::RandRange(DistributionData.VerticalRange * -0.5, DistributionData.VerticalRange * 0.5))};
 	Z += DistributionData.VerticalOffset;
 
-	const FVector Location {FVector(X, Y, Z) + ListenerTransform.GetLocation()};
+	FVector Location {FVector(X, Y, Z) + ListenerTransform.GetLocation()};
+	
+	const FVector Drift {
+		FMath::RandRange(-0.5f * DistributionData.Drift, 0.5f * DistributionData.Drift),
+		FMath::RandRange(-0.5f * DistributionData.Drift, 0.5f * DistributionData.Drift),
+		0.0f
+	};
+
+	Location += Drift; // Add drift to the calculated location
 
 	OutTransform.SetLocation(Location);
 

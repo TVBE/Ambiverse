@@ -38,8 +38,8 @@ struct FAmbiverseSoundDistributionData
 	float Threshold {5000.0f};
 
 	/** The amount of deviation allowed each time the static element is triggered. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Distribution", Meta = (EditCondition = "DistributionMode == EDistributionMode::Static", EditConditionHides))
-	float Drift {0.0f}; //TODO: implement this.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Distribution", Meta = (EditCondition = "DistributionMode == EDistributionMode::Static || DistributionMode == EDistributionMode::Uniform", EditConditionHides))
+	float Drift {0.0f};
 	
 	/** Defines the horizontal range in which a sound source can play in relation to the player. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Horizontal Distribution", Meta = (ClampMin = "0"))
